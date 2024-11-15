@@ -4,6 +4,8 @@ import re
 from .models import CustomUser
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import authenticate
+import random
+from django.core.cache import cache 
 
 # User = get_user_model()
 
@@ -61,12 +63,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     
 
 class PasswordResetSerializer(serializers.Serializer):
-   
-
     phone_number = serializers.CharField()
+    pin = serializers.CharField(required=False, write_only=True)  # PIN for verification
     new_password = serializers.CharField(min_length=6, write_only=True)
     confirm_password = serializers.CharField(min_length=6, write_only=True)
-
 
     def validate_phone_number(self, value):
         if not CustomUser.objects.filter(phone_number=value).exists():
@@ -74,14 +74,37 @@ class PasswordResetSerializer(serializers.Serializer):
         return value
 
     def validate(self, data):
+        phone_number = data.get('phone_number')
+        pin = data.get('pin')
+
+        # Step 1: If PIN is not provided, generate and send it
+        if not pin:
+            generated_pin = str(random.randint(100000, 999999))  # Generate a 6-digit PIN
+            cache.set(f"reset_pin_{phone_number}", generated_pin, timeout=300)  # Store PIN for 5 minutes
+            # Simulate sending the PIN (replace with actual SMS service)
+            print(f"PIN sent to {phone_number}: {generated_pin}")
+            raise serializers.ValidationError(f"A PIN has been sent to your phone. Please enter the PIN to proceed. {generated_pin}")
+
+        # Step 2: Validate the PIN
+        cached_pin = cache.get(f"reset_pin_{phone_number}")
+        if not cached_pin or cached_pin != pin:
+            raise serializers.ValidationError("Invalid or expired PIN.")
+
+        # Step 3: Validate passwords
         if data['new_password'] != data['confirm_password']:
             raise serializers.ValidationError("Passwords do not match.")
+        
         return data
 
     def save(self, **kwargs):
         phone_number = self.validated_data['phone_number']
         new_password = self.validated_data['new_password']
+
+        # Reset the user's password
         user = CustomUser.objects.get(phone_number=phone_number)
         user.set_password(new_password)
         user.save()
+
+        # Delete the PIN after successful reset
+        cache.delete(f"reset_pin_{phone_number}")
         return user
