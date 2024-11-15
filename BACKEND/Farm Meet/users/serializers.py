@@ -67,10 +67,6 @@ class PasswordResetSerializer(serializers.Serializer):
     new_password = serializers.CharField(min_length=6, write_only=True)
     confirm_password = serializers.CharField(min_length=6, write_only=True)
 
-    class Meta:
-        model = CustomUser
-        fields = ['phone_number', 'password']
-        extra_kwargs = {'password': {'write_only': True}}
 
     def validate_phone_number(self, value):
         if not CustomUser.objects.filter(phone_number=value).exists():

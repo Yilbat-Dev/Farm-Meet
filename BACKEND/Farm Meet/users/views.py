@@ -41,6 +41,7 @@ class LogoutView(APIView):
         
 
 class PasswordResetView(APIView):
+    serializer_class = PasswordResetSerializer
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
