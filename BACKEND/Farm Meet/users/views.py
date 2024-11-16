@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, get_user_model
-from .serializers import RegistrationSerializer, CustomTokenObtainPairSerializer, PasswordResetSerializer
+from .serializers import RegistrationSerializer, CustomTokenObtainPairSerializer, GeneratePinSerializer, ResetPasswordSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -30,6 +30,7 @@ class CustomLoginView(TokenObtainPairView):
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+
     def post(self, request):
         try:
             refresh_token = request.data["refresh"]
@@ -40,13 +41,34 @@ class LogoutView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
 
-class PasswordResetView(APIView):
-    serializer_class = PasswordResetSerializer
-    permission_classes = [permissions.AllowAny]
+# class PasswordResetView(APIView):
+#     serializer_class = PasswordResetSerializer
+#     permission_classes = [permissions.AllowAny]
 
+#     def post(self, request):
+#         serializer = PasswordResetSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({"message": "Password reset successful."}, status=status.HTTP_200_OK)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GeneratePinView(APIView):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = GeneratePinSerializer
     def post(self, request):
-        serializer = PasswordResetSerializer(data=request.data)
+        serializer = GeneratePinSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "Password reset successful."}, status=status.HTTP_200_OK)
+            response = serializer.save()
+            return Response(response, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class ResetPasswordView(APIView):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = ResetPasswordSerializer
+    def post(self, request):
+        serializer = ResetPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            response = serializer.save()
+            return Response(response, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
