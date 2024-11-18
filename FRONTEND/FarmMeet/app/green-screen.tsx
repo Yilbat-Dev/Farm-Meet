@@ -1,10 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 
 const GreenScreen = () => {
+  const router = useRouter();
   return (
     <View style={styles.container}>
-      <Text style={styles.whiteText}>FarmMeet</Text>
+      <TouchableOpacity onPress={() => router.push('/splash-1')}>
+        <Text style={styles.whiteText}>FarmMeet</Text>
+      </TouchableOpacity>
+      
     </View>
   );
 };
