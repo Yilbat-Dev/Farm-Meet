@@ -1,37 +1,32 @@
-// import React, { useEffect } from 'react';
-import React, { useEffect as ReactEffect } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
 
-const BottomNavigation = () => {
-  const router = useRouter();
 
-   // Navigate to the next screen after 3 seconds
-   ReactEffect(() => {
+const BottomNavigation = () => {
+    const router = useRouter();
+
+    // Navigate to the next screen after 3 seconds
+  useEffect(() => {
     const timeout = setTimeout(() => {
-      router.push('/splash-2'); // Update to your target screen's path
+      router.push('/splash-3'); // Update to your target screen's path
     }, 2000);
 
     // Cleanup the timeout if the component unmounts
     return () => clearTimeout(timeout);
   }, [router]);
 
-  // Navigate to the splash-2 page
-  // const handleNavigation = () => {
-  //   router.push('/splash-2');
-  // };
-
   return (
     <View style={styles.container}>
       {/* New component covering 60% of the page */}
       <View style={styles.newComponent}>
         {/* Image covering 80% of the newComponent */}
-        <Image source={require('../assets/vegetables.jpg')} style={styles.image} />
+        <Image source={require('../assets/cabbage.jpg')} style={styles.image} />
         
         {/* Text covering 20% of the newComponent */}
         <View style={styles.textContainer}>
-          <Text style={styles.newComponentText}>Fresh From The Farm</Text>
+          <Text style={styles.newComponentText}>Fresh From The Farm spalsh 2</Text>
           <Text style={styles.newComponentTextBody}>
             Your Journey Begins With Local {'\n'}
             Farmer Who Hand Pick The Freshest {'\n'}
@@ -40,19 +35,16 @@ const BottomNavigation = () => {
         </View>
       </View>
 
-      {/* Bottom Controls with Skip and Next */}
+      {/* Existing Skip and Next components */}
       <View style={styles.bottomControls}>
-  {/* Skip Button */}
-  <TouchableOpacity onPress={() => router.push('/splash-2')} style={styles.skipButton}>
-    <Text style={styles.skipText}>Skip</Text>
-  </TouchableOpacity>
-
-  {/* Next Button */}
-  <TouchableOpacity onPress={() => router.push('/splash-2')} style={styles.nextButton}>
-    <Icon name="arrow-forward" size={24} color="white" />
-  </TouchableOpacity>
-</View>
-
+        <TouchableOpacity onPress={() => router.push('/splash-3')}>
+            <Text style={styles.skipText}>Skip</Text>
+        </TouchableOpacity>
+            <TouchableOpacity style={styles.nextButton} onPress={() => router.push('/splash-3')}>
+                <Icon name="arrow-forward" size={24} color="white" />
+            </TouchableOpacity>
+        
+      </View>
     </View>
   );
 };
@@ -77,17 +69,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
   },
-  skipButton: {
-    padding: 10,
-  },
-  nextButton: {
-    backgroundColor: 'green',
-    borderRadius: 50,
-    padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  
   image: {
     width: '100%',
     height: '80%', // Image covers 80% of the component
@@ -124,12 +105,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginRight: 'auto',
   },
-  // nextButton: {
-  //   backgroundColor: 'green',
-  //   borderRadius: 20,
-  //   paddingHorizontal: 20,
-  //   paddingVertical: 10,
-  // },
+  nextButton: {
+    backgroundColor: 'green',
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
   nextText: {
     color: 'white',
     fontSize: 16,
@@ -137,7 +118,4 @@ const styles = StyleSheet.create({
 });
 
 export default BottomNavigation;
-function useEffect(arg0: () => () => void, arg1: import("expo-router").Router[]) {
-  throw new Error('Function not implemented.');
-}
 
