@@ -30,22 +30,31 @@ class CustomLoginView(TokenObtainPairView):
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-
     def post(self, request):
+        refresh_token = request.data.get("refresh")
+        if not refresh_token:
+            return Response(
+                {"error": "Refresh token is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         try:
-            refresh_token = request.data["refresh"]
             token = RefreshToken(refresh_token)
             token.blacklist()
-            return Response({"message": "Logout successful."}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Logout successful."}, status=status.HTTP_200_OK
+            )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
-
+            return Response(
+                {"error": "Invalid refresh token or unable to blacklist."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class GeneratePinView(APIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = GeneratePinSerializer
+
     def post(self, request):
         serializer = GeneratePinSerializer(data=request.data)
         if serializer.is_valid():
