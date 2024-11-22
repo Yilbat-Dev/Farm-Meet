@@ -6,6 +6,13 @@ class FarmerProfileSerializer(serializers.HyperlinkedModelSerializer):
     full_name = serializers.ReadOnlyField(source='user.get_full_name')
     phone_number = serializers.ReadOnlyField(source='user.phone_number')
 
+    farm_category = serializers.ListField(
+        child=serializers.ChoiceField(choices=FarmerProfile.FARM_CATEGORIES)
+    )
+    delivery_days = serializers.ListField(
+        child=serializers.ChoiceField(choices=FarmerProfile.DAYS_OF_WEEK)
+    )
+
     class Meta:
         model = FarmerProfile
         fields = ['id', 'farmer_image','farm_name', 'full_name', 'description', 'farm_category', 'farm_address', 'full_name',
