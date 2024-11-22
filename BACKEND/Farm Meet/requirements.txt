@@ -1,10 +1,12 @@
 africastalking==1.2.9
 asgiref==3.8.1
 black==24.8.0
+Brotli==1.1.0
 certifi==2024.8.30
 charset-normalizer==3.4.0
 click==8.1.7
 colorama==0.4.6
+dj-database-url==2.3.0
 dj-rest-auth==6.0.0
 Django==5.1.2
 django-allauth==65.0.2
@@ -15,6 +17,8 @@ django-rest-authtoken==2.1.4
 djangorestframework==3.15.2
 djangorestframework-simplejwt==5.3.1
 drf-yasg==1.21.7
+gunicorn==23.0.0
+h11==0.14.0
 idna==3.10
 inflection==0.5.1
 littleutils==0.2.4
@@ -34,9 +38,12 @@ PyYAML==6.0.2
 requests==2.32.3
 schema==0.7.7
 sqlparse==0.5.1
+typing_extensions==4.12.2
 tzdata==2024.2
 uritemplate==4.1.1
 urllib3==2.2.3
+uvicorn==0.32.1
+whitenoise==6.8.2
 zope.component==6.0
 zope.deferredimport==5.0
 zope.deprecation==5.0
