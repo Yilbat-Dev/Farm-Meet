@@ -4,6 +4,18 @@ from django.db import models
 from django.core.validators import RegexValidator
 
 class CustomUser(AbstractUser):
+
+    FARMER = 'farmer'
+    CUSTOMER = 'customer'
+    ROLE_CHOICES = [
+        (FARMER, 'Farmer'),
+        (CUSTOMER, 'Customer'),
+    ]
+    role = models.CharField(
+        max_length=10,
+        choices=ROLE_CHOICES,
+        default=FARMER,  # Default role is Farmer
+    )
     phone_number_validator = RegexValidator(
         regex=r'^\+?\d{10,15}$',  # Allow numbers with or without a leading "+"
         message="Phone number must be 10-15 digits, optionally prefixed with '+'."

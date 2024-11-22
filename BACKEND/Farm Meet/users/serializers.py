@@ -13,7 +13,7 @@ from .SMS import AfricaTalkingService
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'first_name', 'last_name','phone_number', 'password']
+        fields = ['username', 'first_name', 'last_name', 'role','phone_number', 'password']
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate_username(self, value):
