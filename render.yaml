@@ -1,8 +1,8 @@
 databases:
-  - name: Farm_Meet
+  - name: farm_meet_db
     plan: free
-    databaseName: Farm-Meet
-    user: Farm_Meet
+    databaseName: farm_meet  # Replaced hyphen with underscore
+    user: farm_meet          # Lowercase user name to match PostgreSQL rules
 
 services:
   - type: web
@@ -14,7 +14,7 @@ services:
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: Farm-Meetdb
+          name: farm_meet_db  # Updated to match the database name
           property: connectionString
       - key: SECRET_KEY
         generateValue: true
