@@ -15,7 +15,7 @@ class FarmerProfileSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = FarmerProfile
-        fields = ['id', 'farmer_image','farm_name', 'full_name', 'description', 'farm_category', 'farm_address', 'full_name',
+        fields = ['id', 'farmer_image','farm_name', 'full_name', 'description', 'farm_category', 'farm_address',
                   'email', 'phone_number', 'farm_size', 'max_orders', 'delivery_days' ]
         
     def validate(self, attrs):
