@@ -18,6 +18,9 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Bind to the port from the environment variable or default to 10000
+PORT = int(os.getenv('PORT', 8000))
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -32,7 +35,7 @@ SECRET_KEY = "django-insecure-9ax3-*3!_h_hmu4l%nos^bqyjl18(5v8m1zu(j*!)lm+vzme0a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
