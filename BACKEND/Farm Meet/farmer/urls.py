@@ -1,9 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import FarmProduceViewSet, ProduceListViewSet
+from .views import FarmerProfileViewSet
 
 router = DefaultRouter()
-router.register(r'produce', FarmProduceViewSet, basename='produce')
-router.register(r'produce-list', ProduceListViewSet, basename='produce-list')
+router.register(r'farmer-profiles', FarmerProfileViewSet, basename='farmer-profile')
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('', include(router.urls)),
+]

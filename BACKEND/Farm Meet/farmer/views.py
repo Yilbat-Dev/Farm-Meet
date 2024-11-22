@@ -1,54 +1,68 @@
 from django.shortcuts import render
 
 # Create your views here.
-from rest_framework import viewsets, permissions,status
+from rest_framework import generics,viewsets, permissions,status
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.authentication import TokenAuthentication
-from .models import FarmProduce
-from .serializers import FarmProduceSerializer, ProduceListSerializer
+from .models import FarmProduce, FarmerProfile
+from .serializers import FarmerProfileSerializer, ProduceSerializer
 from .permissions import IsFarmerOrReadOnly
 
-# class FarmProduceViewSet(viewsets.ModelViewSet):
-#     serializer_class = FarmProduceSerializer
-#     permission_classes = [permissions.AllowAny]
-
-#     def get_queryset(self):
-#         if self.request.user.role == 'farmer':
-#             return FarmProduce.objects.filter(farmer=self.request.user)
-#         return FarmProduce.objects.none()
-
-#     def perform_create(self, serializer):
-#         serializer.save(farmer=self.request.user)
-
-class FarmProduceViewSet(viewsets.ModelViewSet):
+class FarmerProfileViewSet(viewsets.ModelViewSet):
     """
-    ViewSet for farmers to create, update, and delete their own produce.
-    Only users with the 'farmer' role can create, update, or delete produce items.
+    ViewSet for handling Farmer Profiles:
+    - List and retrieve are available for all authenticated users.
+    - Update and delete are restricted to profile owners.
     """
-    queryset = FarmProduce.objects.all()
-    serializer_class = FarmProduceSerializer 
+    queryset = FarmerProfile.objects.all()
+    serializer_class = FarmerProfileSerializer
     permission_classes = [permissions.IsAuthenticated, IsFarmerOrReadOnly]
 
+    # def perform_create(self, serializer):
+    #     """
+    #     ViewSet for farmers to create, update, and delete their own produce
+    #     Ensure only farmers can create a profile and link it to the logged-in user.
+    #     """
+    #     user = self.request.user
+    
+  
+class ProduceViewSet(viewsets.ModelViewSet):
+    queryset = FarmProduce.objects.all()
+    serializer_class = ProduceSerializer
+    ermission_classes = [permissions.IsAuthenticated, IsFarmerOrReadOnly]
+    
     def get_queryset(self):
-        # All authenticated users can view produce, but farmers can only manage their own produce.
-        if self.action in ['update', 'partial_update', 'destroy']:
-            return FarmProduce.objects.filter(farmer=self.request.user)
+        """
+        Authenticated users can view all produce.
+        """
         return FarmProduce.objects.all()
 
     def perform_create(self, serializer):
-        # Ensure only farmers can create produce items.
-        if self.request.user.role != 'farmer':
-            raise PermissionDenied("Only farmers are allowed to create produce items.")
-        # Automatically set the farmer field to the current authenticated user.
-        serializer.save(farmer=self.request.user)
+        """
+        Only users with the 'farmer' role can create produce.
+        """
+        user = self.request.user
+        if user.role != 'farmer':
+            raise PermissionDenied("Only farmers can create produce.")
+        # Ensure the farmer has a profile
+        farmer_profile, created = FarmerProfile.objects.get_or_create(user=user)
+        serializer.save(farmer_profile=farmer_profile)
 
+    def perform_update(self, serializer):
+        """
+        Ensure only the owner of the produce (farmer) can update it.
+        """
+        user = self.request.user
+        if self.get_object().farmer_profile.user != user:
+            raise PermissionDenied("You do not have permission to edit this produce.")
+        serializer.save()
 
-class ProduceListViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Read-only ViewSet for authenticated users to list all produce items with basic details.
-    """
-    queryset = FarmProduce.objects.all()
-    serializer_class = ProduceListSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    def perform_destroy(self, instance):
+        """
+        Ensure only the owner of the produce (farmer) can delete it.
+        """
+        user = self.request.user
+        if instance.farmer_profile.user != user:
+            raise PermissionDenied("You do not have permission to delete this produce.")
+        instance.delete()

@@ -6,14 +6,14 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import authenticate
 import random
 from django.core.cache import cache 
+from .SMS import AfricaTalkingService
 
-# User = get_user_model()
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'phone_number', 'password']
+        fields = ['username', 'first_name', 'last_name','phone_number', 'password']
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate_username(self, value):
@@ -62,52 +62,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return data
     
 
-# class PasswordResetSerializer(serializers.Serializer):
-#     phone_number = serializers.CharField()
-#     pin = serializers.CharField(required=False, write_only=True)  # PIN for verification
-#     new_password = serializers.CharField(min_length=6, write_only=True)
-#     confirm_password = serializers.CharField(min_length=6, write_only=True)
-
-#     def validate_phone_number(self, value):
-#         if not CustomUser.objects.filter(phone_number=value).exists():
-#             raise serializers.ValidationError("Phone number not found.")
-#         return value
-
-#     def validate(self, data):
-#         phone_number = data.get('phone_number')
-#         pin = data.get('pin')
-
-#         # Step 1: If PIN is not provided, generate and send it
-#         if not pin:
-#             generated_pin = str(random.randint(100000, 999999))  # Generate a 6-digit PIN
-#             cache.set(f"reset_pin_{phone_number}", generated_pin, timeout=300)  # Store PIN for 5 minutes
-#             # Simulate sending the PIN (replace with actual SMS service)
-#             raise serializers.ValidationError(f"A PIN has been sent to your phone. Please enter the PIN to proceed. {generated_pin}")
-
-#         # Step 2: Validate the PIN
-#         cached_pin = cache.get(f"reset_pin_{phone_number}")
-#         if not cached_pin or cached_pin != pin:
-#             raise serializers.ValidationError("Invalid or expired PIN.")
-
-#         # Step 3: Validate passwords
-#         if data['new_password'] != data['confirm_password']:
-#             raise serializers.ValidationError("Passwords do not match.")
-        
-#         return data
-
-#     def save(self, **kwargs):
-#         phone_number = self.validated_data['phone_number']
-#         new_password = self.validated_data['new_password']
-
-#         # Reset the user's password
-#         user = CustomUser.objects.get(phone_number=phone_number)
-#         user.set_password(new_password)
-#         user.save()
-
-#         # Delete the PIN after successful reset
-#         cache.delete(f"reset_pin_{phone_number}")
-#         return user
-
 
 class GeneratePinSerializer(serializers.Serializer):
     phone_number = serializers.CharField()
@@ -126,8 +80,18 @@ class GeneratePinSerializer(serializers.Serializer):
         cache.set("current_reset_phone", phone_number, timeout=300)  # Store phone no for 5 minutes
 
         # Simulate sending the PIN (replace with actual SMS service)
+
+         # Use Africa's Talking to send the SMS
+        sms_service = AfricaTalkingService()
+        message = f"Your verification PIN is {generated_pin}. It will expire in 5 minutes."
+        result = sms_service.send_sms(phone_number, message)
+
+        if result['status'] == "success":
+            return f"A PIN has been sent to your phone number: {phone_number}. Please enter the PIN to proceed."
+        else:
+            raise serializers.ValidationError(f"Failed to send PIN: {result['message']}")
         # print(f"PIN sent to {phone_number}: {generated_pin}")
-        raise serializers.ValidationError(f"A PIN has been sent to your phone no: {phone_number} Please enter the PIN to proceed. {generated_pin}")
+        # raise serializers.ValidationError(f"A PIN has been sent to your phone no: {phone_number} Please enter the PIN to proceed. {generated_pin}")
     
 
 class ResetPasswordSerializer(serializers.Serializer):
@@ -148,7 +112,7 @@ class ResetPasswordSerializer(serializers.Serializer):
         # Validate PIN
         cached_pin = cache.get(f"reset_pin_{phone_number}")
         if not cached_pin or cached_pin != pin:
-            raise serializers.ValidationError("Invalid or expired PIN.")
+            raise serializers.ValidationError("Invalid or expired PIN. Please request a new PIN")
 
         # Validate passwords
         if data['new_password'] != data['confirm_password']:

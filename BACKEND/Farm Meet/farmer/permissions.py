@@ -12,4 +12,4 @@ class IsFarmerOrReadOnly(permissions.BasePermission):
             return True
 
         # Write permissions are only allowed to the farmer (owner) of the produce.
-        return obj.farmer == request.user
+        return obj.user == request.user

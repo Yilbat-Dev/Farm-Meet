@@ -1,18 +1,22 @@
-from django.db import models
-from farmer.models import FarmProduce
-from django.contrib.auth import get_user_model
-from django.conf import settings
+# from django.db import models
+# from django.conf import settings
 
-User = get_user_model()
+# class CustomerProfile(models.Model):
+#     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+#     address = models.TextField()
+#     profile_picture = models.ImageField(upload_to='customers/profiles/', blank=True, null=True)
 
-class Order(models.Model):
-    DELIVERY_CHOICES = [
-        ('pickup', 'Pick-Up'),
-        ('doorstep', 'Door-Step'),
-    ]
-    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders')
-    produce = models.ForeignKey(FarmProduce, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
-    delivery_type = models.CharField(max_length=10, choices=DELIVERY_CHOICES)
-    is_paid = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+#     def __str__(self):
+#         return self.user.username
+
+
+# class Order(models.Model):
+#     customer = models.ForeignKey(CustomerProfile, on_delete=models.CASCADE)
+#     produce = models.ForeignKey('farmer.Produce', on_delete=models.CASCADE)
+#     quantity = models.PositiveIntegerField()
+#     delivery_option = models.CharField(max_length=255)  # Delivery options
+#     paid = models.BooleanField(default=False)
+#     order_date = models.DateTimeField(auto_now_add=True)
+
+#     def __str__(self):
+#         return f"Order {self.id} - {self.produce.name} by {self.customer.user.username}"

@@ -1,31 +1,33 @@
 from rest_framework import serializers
-from .models import FarmProduce
-from django.contrib.auth import get_user_model
+from .models import FarmProduce, FarmerProfile
 
-User = get_user_model()
 
-class FarmProduceSerializer(serializers.HyperlinkedModelSerializer):
-    # farmer = serializers.HyperlinkedRelatedField(
-    #     view_name='produce',  # Assumes there is a user detail view
-    #     read_only=True
-    # )
+class FarmerProfileSerializer(serializers.HyperlinkedModelSerializer):
+    full_name = serializers.ReadOnlyField(source='user.get_full_name')
+    phone_number = serializers.ReadOnlyField(source='user.phone_number')
 
     class Meta:
-        model = FarmProduce
-        fields = ['url', 'id', 'name', 'description', 'price', 'farmer', 'created_at']
-        read_only_fields = ['farmer', 'created_at']
-        extra_kwargs = {
-            'url': {'view_name': 'farmproduce-detail', 'lookup_field': 'pk'}
-        }
+        model = FarmerProfile
+        fields = ['id', 'farmer_image','farm_name', 'full_name', 'description', 'farm_category', 'farm_address', 'full_name',
+                  'email', 'phone_number', 'farm_size', 'max_orders', 'delivery_days' ]
+        
+        def validate(self, attrs):
+            user = self.context['request'].user
+            if user.role != 'farmer':  # Adjust 'role' to match your CustomUser field
+                raise serializers.ValidationError("Only users with the farmer role can create a farmer profile.")
+            return attrs
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        if FarmerProfile.objects.filter(user=user).exists():
+            raise serializers.ValidationError("A profile for this farmer already exists.")
+        validated_data['user'] = user
+        return super().create(validated_data)
 
 
-class ProduceListSerializer(serializers.HyperlinkedModelSerializer):
-    farmer = serializers.CharField(source="farmer.username", read_only=True)  # Display the farmer's username
-
+class ProduceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = FarmProduce
-        fields = ['url', 'id', 'name', 'price', 'created_at', 'farmer']
-        extra_kwargs = {
-            'url': {'view_name': 'farmproduce-detail', 'lookup_field': 'pk'}
-        }
-
+        fields = ['id', 'name', 'description', 'price',
+                  'image', 'created_at']
+        read_only_fields = ['id', 'created_at', 'farmer_profile']

@@ -41,16 +41,6 @@ class LogoutView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
 
-# class PasswordResetView(APIView):
-#     serializer_class = PasswordResetSerializer
-#     permission_classes = [permissions.AllowAny]
-
-#     def post(self, request):
-#         serializer = PasswordResetSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response({"message": "Password reset successful."}, status=status.HTTP_200_OK)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GeneratePinView(APIView):
