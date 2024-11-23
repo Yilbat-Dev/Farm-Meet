@@ -100,7 +100,7 @@ WSGI_APPLICATION = "Farm_Meet.wsgi.application"
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://postgres:Yilbat123@localhost:12345/Farm-Meet',
+        default='postgresql://farm_meet:39EpNrZHOyIclXd6n8tzug0EBSxG3eyO@dpg-ct0gn5lumphs73fi5opg-a/farm_meet',
         conn_max_age=600,  # Keeps database connections open for better performance
         ssl_require=True  # Enforce SSL for secure connection
     )
