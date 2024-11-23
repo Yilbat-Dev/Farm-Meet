@@ -18,6 +18,7 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 # Bind to the port from the environment variable or default to 10000
 # PORT = int(os.getenv('PORT', 8000))
 
@@ -34,8 +35,6 @@ SECRET_KEY = "django-insecure-9ax3-*3!_h_hmu4l%nos^bqyjl18(5v8m1zu(j*!)lm+vzme0a
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -100,9 +99,9 @@ WSGI_APPLICATION = "Farm_Meet.wsgi.application"
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://postgres:Yilbat123@localhost:12345/Farm-Meet',
+        default=os.getenv('DATABASE_URL', 'postgresql://localhost:5432/mydatabase'),
         conn_max_age=600,  # Keeps database connections open for better performance
-        ssl_require=True  # Enforce SSL for secure connection
+        ssl_require=True    # Enforce SSL for secure connection
     )
 }
 
