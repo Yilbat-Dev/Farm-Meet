@@ -19,7 +19,7 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Bind to the port from the environment variable or default to 10000
-PORT = int(os.getenv('PORT', 8000))
+# PORT = int(os.getenv('PORT', 8000))
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
