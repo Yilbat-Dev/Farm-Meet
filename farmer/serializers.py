@@ -23,24 +23,6 @@ class FarmerProfileSerializer(serializers.HyperlinkedModelSerializer):
             if user.role != 'farmer':  # Adjust 'role' to match your CustomUser field
                 raise serializers.ValidationError("Only users with the farmer role can create a farmer profile.")
             return attrs
-    
-    # def validate_farm_category(self, value):
-    #     # Ensure the input is a list and contains valid choices
-    #     if not isinstance(value, list):
-    #         raise serializers.ValidationError("Farm category must be a list.")
-    #     invalid_choices = [item for item in value if item not in dict(FarmerProfile.FARM_CATEGORIES)]
-    #     if invalid_choices:
-    #         raise serializers.ValidationError(f"Invalid choices: {invalid_choices}")
-    #     return value
-
-    # def validate_delivery_days(self, value):
-    #     # Ensure the input is a list and contains valid choices
-    #     if not isinstance(value, list):
-    #         raise serializers.ValidationError("Delivery days must be a list.")
-    #     invalid_choices = [item for item in value if item not in dict(FarmerProfile.DAYS_OF_WEEK)]
-    #     if invalid_choices:
-    #         raise serializers.ValidationError(f"Invalid choices: {invalid_choices}")
-    #     return value
 
     def validate_farm_category(self, value):
         if not value:

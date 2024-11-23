@@ -6,10 +6,30 @@ from django.contrib.auth import authenticate, get_user_model
 from .serializers import RegistrationSerializer, CustomTokenObtainPairSerializer, GeneratePinSerializer, ResetPasswordSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
+from .models import CustomUser
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
+
 
 class RegistrationView(APIView):
+    queryset = CustomUser.objects.all()
     serializer_class = RegistrationSerializer
     permission_classes = [permissions.AllowAny]
+
+
+    @swagger_auto_schema(
+        request_body=RegistrationSerializer,
+        responses={
+            201: openapi.Response(
+                description="User registered successfully",
+                examples={
+                    "application/json": {"message": "User registered successfully."}
+                },
+            ),
+            400: openapi.Response(description="Validation errors"),
+        },
+    )
     
     def post(self, request):
         serializer = RegistrationSerializer(data=request.data)
@@ -23,12 +43,27 @@ class RegistrationView(APIView):
 
 
 class CustomLoginView(TokenObtainPairView):
+    queryset = CustomUser.objects.all()
     permission_classes = [permissions.AllowAny]
     serializer_class = CustomTokenObtainPairSerializer
 
 
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'refresh': openapi.Schema(type=openapi.TYPE_STRING, description='Refresh token'),
+            },
+            required=['refresh'],
+        ),
+        responses={
+            200: openapi.Response(description="Logout successful."),
+            400: openapi.Response(description="Invalid refresh token or unable to blacklist."),
+        },
+    )
 
     def post(self, request):
         refresh_token = request.data.get("refresh")
@@ -55,6 +90,14 @@ class GeneratePinView(APIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = GeneratePinSerializer
 
+    @swagger_auto_schema(
+        request_body=GeneratePinSerializer,
+        responses={
+            200: openapi.Response(description="Pin generated successfully."),
+            400: openapi.Response(description="Validation errors."),
+        },
+    )
+
     def post(self, request):
         serializer = GeneratePinSerializer(data=request.data)
         if serializer.is_valid():
@@ -65,6 +108,15 @@ class GeneratePinView(APIView):
 class ResetPasswordView(APIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = ResetPasswordSerializer
+
+    @swagger_auto_schema(
+        request_body=ResetPasswordSerializer,
+        responses={
+            200: openapi.Response(description="Password reset successful."),
+            400: openapi.Response(description="Validation errors."),
+        },
+    )
+    
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
         if serializer.is_valid():

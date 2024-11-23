@@ -46,11 +46,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-      # Third-party apps
+    # Third-party apps
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    
+    'drf_yasg',
+
 
     # Custom apps
     'users',
@@ -67,7 +68,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-     'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 
@@ -102,14 +103,11 @@ WSGI_APPLICATION = "Farm_Meet.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    # 'default': dj_database_url.config(
-    #     default=os.getenv('postgresql://farm_meet:39EpNrZHOyIclXd6n8tzug0EBSxG3eyO@dpg-ct0gn5lumphs73fi5opg-a/farm_meet'),
-    #     conn_max_age=600,  # Keeps database connections open for better performance
-    #     ssl_require=True    # Enforce SSL for secure connection
-    # )
+
 }
 
-DATABASES["default"] = dj_database_url.parse("postgresql://farm_meet:39EpNrZHOyIclXd6n8tzug0EBSxG3eyO@dpg-ct0gn5lumphs73fi5opg-a.oregon-postgres.render.com/farm_meet")
+DATABASES["default"] = dj_database_url.parse(
+    "postgresql://farm_meet:39EpNrZHOyIclXd6n8tzug0EBSxG3eyO@dpg-ct0gn5lumphs73fi5opg-a.oregon-postgres.render.com/farm_meet")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -177,13 +175,12 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days = 7),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=10),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
-
 
 
 # Media files (images)

@@ -19,12 +19,6 @@ class FarmerProfileViewSet(viewsets.ModelViewSet):
     serializer_class = FarmerProfileSerializer
     permission_classes = [permissions.IsAuthenticated, IsFarmerOrReadOnly]
 
-    # def perform_create(self, serializer):
-    #     """
-    #     ViewSet for farmers to create, update, and delete their own produce
-    #     Ensure only farmers can create a profile and link it to the logged-in user.
-    #     """
-    #     user = self.request.user
     
   
 class ProduceViewSet(viewsets.ModelViewSet):
