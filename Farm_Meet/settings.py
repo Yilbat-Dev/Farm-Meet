@@ -35,7 +35,7 @@ SECRET_KEY = "django-insecure-9ax3-*3!_h_hmu4l%nos^bqyjl18(5v8m1zu(j*!)lm+vzme0a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = ['farm-meet-1.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
