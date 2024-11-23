@@ -102,12 +102,14 @@ WSGI_APPLICATION = "Farm_Meet.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('postgresql://farm_meet:39EpNrZHOyIclXd6n8tzug0EBSxG3eyO@dpg-ct0gn5lumphs73fi5opg-a/farm_meet'),
-        conn_max_age=600,  # Keeps database connections open for better performance
-        ssl_require=True    # Enforce SSL for secure connection
-    )
+    # 'default': dj_database_url.config(
+    #     default=os.getenv('postgresql://farm_meet:39EpNrZHOyIclXd6n8tzug0EBSxG3eyO@dpg-ct0gn5lumphs73fi5opg-a/farm_meet'),
+    #     conn_max_age=600,  # Keeps database connections open for better performance
+    #     ssl_require=True    # Enforce SSL for secure connection
+    # )
 }
+
+DATABASES["default"] = dj_database_url.parse("postgresql://farm_meet:39EpNrZHOyIclXd6n8tzug0EBSxG3eyO@dpg-ct0gn5lumphs73fi5opg-a.oregon-postgres.render.com/farm_meet")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
