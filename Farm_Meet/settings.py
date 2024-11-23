@@ -69,6 +69,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
      'corsheaders.middleware.CorsMiddleware',
 ]
+
+
+ALLOWED_HOSTS = ['farm-meet-1.onrender.com', 'localhost', '127.0.0.1']
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Replace with your frontend's URL
 ]
