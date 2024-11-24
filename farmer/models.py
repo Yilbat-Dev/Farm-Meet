@@ -56,12 +56,29 @@ class FarmerProfile(models.Model):
 
 
 class FarmProduce(models.Model):
+    PRODUCE_CATEGORIES = [
+        ('vegetable', 'Vegetable'),
+        ('meat_and_seafood', 'Meat and Seafood'),
+        ('produce', 'Produce'),
+        ('dairy_and_eggs', 'Dairy and Eggs'),
+    ]
+    PRODUCE_STATUS = [
+         ('available', 'Available'),
+        ('out of stock', 'Out of Stock'),
+     ]
+
     farmer_profile = models.ForeignKey(FarmerProfile, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     description = models.TextField()
+    produce_categories =models.CharField(max_length=50, choices=PRODUCE_CATEGORIES, default="vegetables")
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    image = models.ImageField(upload_to='media/produce/', blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    pickup_location = models.TextField(blank=True, null=True)
+    produce_status = models.CharField(max_length=50, choices=PRODUCE_STATUS, default="out of stock")
 
     def __str__(self):
         return self.name
+    
+
+class ProduceImage(models.Model):
+    produce = models.ForeignKey(FarmProduce, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='media/produce/')

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FarmProduce, FarmerProfile
+from .models import FarmProduce, FarmerProfile,ProduceImage 
 
 
 class FarmerProfileSerializer(serializers.HyperlinkedModelSerializer):
@@ -42,10 +42,17 @@ class FarmerProfileSerializer(serializers.HyperlinkedModelSerializer):
         return super().create(validated_data)
     
 
+class ProduceImageSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ProduceImage
+        fields = ['id', 'image']
+
 
 class ProduceSerializer(serializers.HyperlinkedModelSerializer):
+    images = ProduceImageSerializer(many=True, read_only=True)
     class Meta:
         model = FarmProduce
-        fields = ['id', 'name', 'description', 'price',
-                  'image', 'created_at']
-        read_only_fields = ['id', 'created_at', 'farmer_profile']
+        fields = ['id', 'name', 'description', 'produce_categories','images', 'produce_status', 'price',
+                   'pickup_location']
+        read_only_fields = ['id']
+
