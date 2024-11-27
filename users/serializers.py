@@ -6,45 +6,38 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 import random
-from django.core.cache import cache
+from django.core.cache import cache 
 from .SMS import AfricaTalkingService
 
 CustomUser = get_user_model()
 
-
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'first_name', 'last_name',
-                  'role', 'phone_number', 'password']
+        fields = ['username', 'first_name', 'last_name', 'role','phone_number', 'password']
         extra_kwargs = {
-            'username': {'required': True},
-            'first_name': {'required': True},
-            'last_name': {'required': False},
-            'role': {'required': False},
-            'phone_number': {'required': True},
-            'password': {'write_only': True, 'required': True},
-        }
-
+        'username': {'required': True},
+        'first_name': {'required': True},
+        'last_name': {'required': False},
+        'role': {'required': False},
+        'phone_number': {'required': True},
+        'password': {'write_only': True, 'required': True},
+    }
     def validate_username(self, value):
         if CustomUser.objects.filter(username=value).exists():
-            raise serializers.ValidationError(
-                "This username is already taken.")
+            raise serializers.ValidationError("This username is already taken.")
         return value
 
     def validate_phone_number(self, value):
         if CustomUser.objects.filter(phone_number=value).exists():
-            raise serializers.ValidationError(
-                "This phone number is already in use.")
+            raise serializers.ValidationError("This phone number is already in use.")
         return value
 
     def validate_password(self, value):
         if len(value) < 6:
-            raise serializers.ValidationError(
-                "Password must be at least 6 characters long.")
+            raise serializers.ValidationError("Password must be at least 6 characters long.")
         if not re.search(r'\d', value):
-            raise serializers.ValidationError(
-                "Password must contain at least one number.")
+            raise serializers.ValidationError("Password must contain at least one number.")
         return value
 
     def create(self, validated_data):
@@ -54,10 +47,12 @@ class RegistrationSerializer(serializers.ModelSerializer):
             phone_number=validated_data['phone_number'],
             password=validated_data['password']
         )
-
+    
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
 
 User = get_user_model()
-
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     phone_number = serializers.CharField()
@@ -73,45 +68,40 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         password = attrs.get('password')
 
         if not phone_number:
-            raise serializers.ValidationError(
-                {"phone_number": "This field is required."})
+            raise serializers.ValidationError({"phone_number": "This field is required."})
         if not password:
-            raise serializers.ValidationError(
-                {"password": "This field is required."})
-
+            raise serializers.ValidationError({"password": "This field is required."})
+        
          # Standardize the phone number format
         if not phone_number.startswith('+'):  # Add country code if missing
-            # Strip leading zero and prepend +234
-            phone_number = f'+234{phone_number.lstrip("0")}'
+            phone_number = f'+234{phone_number.lstrip("0")}'  # Strip leading zero and prepend +234
 
         # Authenticate the user with phone_number
         try:
             user = User.objects.get(phone_number=phone_number)
         except User.DoesNotExist:
-            raise serializers.ValidationError(
-                "Invalid phone number or password.")
+            raise serializers.ValidationError("Invalid phone number or password.")
 
         # Check the password
         if not user.check_password(password):
-            raise serializers.ValidationError(
-                "Invalid phone number or password.")
-
+            raise serializers.ValidationError("Invalid phone number or password.")
+        
         if not user.is_active:
             raise serializers.ValidationError("This account is inactive.")
 
-        # Generate tokens manually
-
+        # Generate tokens manually 
+        
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
+        
 
         # Return the custom data with the tokens
         return {
-
+            
             'access': access_token,
             'refresh': str(refresh),
             'phone_number': user.phone_number
         }
-
 
 class GeneratePinSerializer(serializers.Serializer):
     phone_number = serializers.CharField()
@@ -119,13 +109,12 @@ class GeneratePinSerializer(serializers.Serializer):
     def validate_phone_number(self, value):
         # Standardize the phone number format
         if not value.startswith('+'):  # Add country code if missing
-            # Strip leading zero and prepend +234
-            value = f'+234{value.lstrip("0")}'
-
+            value = f'+234{value.lstrip("0")}'  # Strip leading zero and prepend +234
+        
         # Check if the standardized phone number exists in the database
         if not CustomUser.objects.filter(phone_number=value).exists():
             raise serializers.ValidationError("Phone number not found.")
-
+        
         # Return the standardized phone number
         return value
 
@@ -136,10 +125,8 @@ class GeneratePinSerializer(serializers.Serializer):
         generated_pin = str(random.randint(100000, 999999))
 
         # Store the PIN and phone number in the cache
-        # Store PIN for 5 minutes
-        cache.set(f"reset_pin_{phone_number}", generated_pin, timeout=300)
-        # Store phone number for 5 minutes
-        cache.set("current_reset_phone", phone_number, timeout=300)
+        cache.set(f"reset_pin_{phone_number}", generated_pin, timeout=300)  # Store PIN for 5 minutes
+        cache.set("current_reset_phone", phone_number, timeout=300)  # Store phone number for 5 minutes
 
         # Prepare the message
         message = f"Your verification PIN is {generated_pin}. It will expire in 5 minutes."
@@ -156,8 +143,7 @@ class GeneratePinSerializer(serializers.Serializer):
                 "generated_pin": generated_pin
             }
         else:
-            raise serializers.ValidationError(
-                f"Failed to send PIN: {result.get('message', 'Unknown error')}")
+            raise serializers.ValidationError(f"Failed to send PIN: {result.get('message', 'Unknown error')}")
 
 
 class ResetPasswordSerializer(serializers.Serializer):
@@ -167,30 +153,31 @@ class ResetPasswordSerializer(serializers.Serializer):
     confirm_password = serializers.CharField(min_length=6, write_only=True)
 
     def validate(self, data):
-
+        
         pin = data.get('pin')
         user_phone_number = data.get('phone_number')
+
+        # Standardize the phone number format
+        if not user_phone_number.startswith('+'):  # Add country code if missing
+            user_phone_number = f'+234{user_phone_number.lstrip("0")}'  # Strip leading zero and prepend +234
 
         # Retrieve phone number from cache
         phone_number = cache.get("current_reset_phone")
         if not phone_number:
-            raise serializers.ValidationError(
-                "Session expired. Please request a new PIN.")
+            raise serializers.ValidationError("Session expired. Please request a new PIN.")
         elif phone_number != user_phone_number:
-            raise serializers.ValidationError(
-                "Wrong Number pls input correct user phone number.")
-
+            raise serializers.ValidationError("Wrong Number pls input correct user phone number.")
+        
         # Validate PIN
         cached_pin = cache.get(f"reset_pin_{phone_number}")
         if not cached_pin or cached_pin != pin:
-            raise serializers.ValidationError(
-                "Invalid or expired PIN. Please request a new PIN")
+            raise serializers.ValidationError("Invalid or expired PIN. Please request a new PIN")
 
         # Validate passwords
         if data['new_password'] != data['confirm_password']:
             raise serializers.ValidationError("Passwords do not match.")
         # return data
-
+    
         data['phone_number'] = phone_number
         return data
 
@@ -204,7 +191,7 @@ class ResetPasswordSerializer(serializers.Serializer):
         user.save()
 
         # Delete the PIN after successful reset
-        # Delete the PIN and phone number after successful reset
+         # Delete the PIN and phone number after successful reset
         cache.delete(f"reset_pin_{phone_number}")
         cache.delete("current_reset_phone")
 
