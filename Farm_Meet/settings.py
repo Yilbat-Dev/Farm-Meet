@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     # Third-party apps
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
@@ -73,10 +74,6 @@ MIDDLEWARE = [
 
 
 ALLOWED_HOSTS = ['farm-meet-1.onrender.com', 'localhost', '127.0.0.1']
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Replace with your frontend's URL
-]
 
 ROOT_URLCONF = "Farm_Meet.urls"
 
@@ -192,9 +189,6 @@ AFRICASTALKING_USERNAME = 'sandbox'
 AFRICASTALKING_API_KEY = 'atsk_f99b550848e98e1cf4f40b7146064f9855cdca7a79780081afc1174d50d13d65b0ed7ae5'
 
 # add corsheaders
-
-INSTALLED_APPS += ['corsheaders']
-MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:8081',
