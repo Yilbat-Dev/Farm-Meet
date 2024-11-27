@@ -190,3 +190,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # SMS
 AFRICASTALKING_USERNAME = 'sandbox'
 AFRICASTALKING_API_KEY = 'atsk_f99b550848e98e1cf4f40b7146064f9855cdca7a79780081afc1174d50d13d65b0ed7ae5'
+
+# add corsheaders
+
+INSTALLED_APPS += ['corsheaders']
+MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8081',
+]
