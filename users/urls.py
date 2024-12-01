@@ -1,12 +1,13 @@
 from django.urls import path
-from .views import RegistrationView, CustomLoginView, LogoutView, GeneratePinView, ResetPasswordView
+from .views import RegistrationView, PinValidationview, CustomLoginView, LogoutView, GeneratePinView, ResetPasswordView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 
 
 
 urlpatterns = [
-    path('register/', RegistrationView.as_view(), name = 'register'),
+    path('register-generate-pin/', RegistrationView.as_view(), name = 'register-generate-pin'),
+     path('register-pin-validate/', PinValidationview.as_view(), name = 'register-validate-pin'),
     path('login/', CustomLoginView.as_view(), name='custom_login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('generate-pin/', GeneratePinView.as_view(), name='generate_pin'),

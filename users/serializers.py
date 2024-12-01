@@ -1,10 +1,9 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
 import re
 from .models import CustomUser
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 import random
 from django.core.cache import cache 
 from .SMS import AfricaTalkingService
@@ -14,21 +13,16 @@ CustomUser = get_user_model()
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'first_name', 'last_name', 'role','phone_number', 'password']
+        fields = ['full_name', 'role', 'phone_number', 'password']
         extra_kwargs = {
-        'username': {'required': True},
-        'first_name': {'required': True},
-        'last_name': {'required': False},
-        'role': {'required': False},
-        'phone_number': {'required': True},
-        'password': {'write_only': True, 'required': True},
-    }
-    def validate_username(self, value):
-        if CustomUser.objects.filter(username=value).exists():
-            raise serializers.ValidationError("This username is already taken.")
-        return value
+            'role': {'required': True},
+            'phone_number': {'required': True},
+            'password': {'write_only': True, 'required': True},
+        }
 
     def validate_phone_number(self, value):
+        if not value.startswith('+'):
+            value = f'+234{value.lstrip("0")}'  # Standardize Nigerian format
         if CustomUser.objects.filter(phone_number=value).exists():
             raise serializers.ValidationError("This phone number is already in use.")
         return value
@@ -41,18 +35,70 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        # Create user with validated data and hash the password
-        return CustomUser.objects.create_user(
-            username=validated_data['username'],
-            phone_number=validated_data['phone_number'],
-            password=validated_data['password']
-        )
-    
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework import serializers
-from django.contrib.auth import get_user_model
+        pin = str(random.randint(100000, 999999))  # Generate a 6-digit PIN
+        phone_number = validated_data['phone_number']
 
-User = get_user_model()
+        # Save user data and PIN to cache
+        cache.set(f"temp_user_{phone_number}", validated_data, timeout=300)  # Store user data for 5 minutes
+        cache.set(f"pin_{phone_number}", pin, timeout=300)  # Store PIN for 5 minutes
+
+       
+        # Prepare the message
+        message = f"Your verification PIN is {pin}. It will expire in 5 minutes."
+
+        # Use Africa's Talking to send the SMS
+        sms_service = AfricaTalkingService()
+        result = sms_service.send_sms(phone_number, message)
+
+        if result.get('status') != "success":
+            raise serializers.ValidationError(f"Failed to send PIN: {result.get('message', 'Unknown error')}")
+
+       
+        return {
+            "message": f"A PIN has been sent to your phone number: {phone_number}. Please enter the PIN {pin} to proceed.",
+        }
+
+class PinValidationSerializer(serializers.Serializer):
+    pin_code = serializers.CharField()
+
+    def validate(self, data):
+        pin_code = data.get("pin_code")
+
+        # Retrieve phone number associated with the PIN
+        phone_number = None
+        for key in cache.iter_keys("pin_*"):  # Efficient key lookup (Redis-compatible)
+            if cache.get(key) == pin_code:
+                phone_number = key.split("_")[1]  # Extract phone number from key
+                break
+
+        if not phone_number:
+            raise serializers.ValidationError("Invalid PIN or PIN has expired.")
+
+        # Retrieve user data from cache
+        user_data = cache.get(f"temp_user_{phone_number}")
+        if not user_data:
+            raise serializers.ValidationError("Session expired. Please request a new PIN.")
+
+        # Ensure no duplicate active user exists
+        if CustomUser.objects.filter(phone_number=phone_number, is_active=True).exists():
+            raise serializers.ValidationError("User is already activated.")
+
+        # Create and activate the user
+        user = CustomUser.objects.create_user(
+            full_name=user_data['full_name'],
+            phone_number=phone_number,
+            role=user_data['role'],
+            password=user_data['password'],
+            is_active=True,
+        )
+
+        # Clear the cached data
+        cache.delete(f"temp_user_{phone_number}")
+        cache.delete(f"pin_{phone_number}")
+
+        return {"message": "User activated successfully."}
+
+
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     phone_number = serializers.CharField()
@@ -78,8 +124,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         # Authenticate the user with phone_number
         try:
-            user = User.objects.get(phone_number=phone_number)
-        except User.DoesNotExist:
+            user = CustomUser.objects.get(phone_number=phone_number)
+        except CustomUser.DoesNotExist:
             raise serializers.ValidationError("Invalid phone number or password.")
 
         # Check the password

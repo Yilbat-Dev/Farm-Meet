@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, get_user_model
-from .serializers import RegistrationSerializer, CustomTokenObtainPairSerializer, GeneratePinSerializer, ResetPasswordSerializer
+from .serializers import RegistrationSerializer, PinValidationSerializer, CustomTokenObtainPairSerializer, GeneratePinSerializer, ResetPasswordSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import CustomUser
@@ -11,12 +11,9 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 
-
 class RegistrationView(APIView):
-    queryset = CustomUser.objects.all()
     serializer_class = RegistrationSerializer
     permission_classes = [permissions.AllowAny]
-
 
     @swagger_auto_schema(
         request_body=RegistrationSerializer,
@@ -30,9 +27,32 @@ class RegistrationView(APIView):
             400: openapi.Response(description="Validation errors"),
         },
     )
-    
     def post(self, request):
         serializer = RegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            response = serializer.save()
+            return Response(response, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PinValidationview(APIView):
+    serializer_class = PinValidationSerializer
+    permission_classes = [permissions.AllowAny]
+
+    @swagger_auto_schema(
+        request_body=PinValidationSerializer,
+        responses={
+            201: openapi.Response(
+                description="User registered successfully",
+                examples={
+                    "application/json": {"message": "User registered successfully."}
+                },
+            ),
+            400: openapi.Response(description="Validation errors"),
+        },
+    )
+    def post(self, request):
+        serializer = PinValidationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(
@@ -64,7 +84,6 @@ class LogoutView(APIView):
             400: openapi.Response(description="Invalid refresh token or unable to blacklist."),
         },
     )
-
     def post(self, request):
         refresh_token = request.data.get("refresh")
         if not refresh_token:
@@ -97,14 +116,14 @@ class GeneratePinView(APIView):
             400: openapi.Response(description="Validation errors."),
         },
     )
-
     def post(self, request):
         serializer = GeneratePinSerializer(data=request.data)
         if serializer.is_valid():
             response = serializer.save()
             return Response(response, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+
 class ResetPasswordView(APIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = ResetPasswordSerializer
@@ -116,7 +135,6 @@ class ResetPasswordView(APIView):
             400: openapi.Response(description="Validation errors."),
         },
     )
-    
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
         if serializer.is_valid():
