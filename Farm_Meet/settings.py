@@ -199,13 +199,18 @@ SIMPLE_JWT = {
 # Social Providers Configuration
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
-        'SCOPE': ['profile', 'email'],
+        'SCOPE': [
+            'profile',
+            'email',
+            'https://www.googleapis.com/auth/user.phonenumbers.read',
+        ],
         'AUTH_PARAMS': {'access_type': 'online'},
         'OAUTH_PKCE_ENABLED': True,
     },
     'facebook': {
         'METHOD': 'oauth2',
-        'SCOPE': ['email'],
+        'SCOPE': ['email', 'user_mobile_phone'],
+        'FIELDS': ['id', 'email', 'name', 'first_name', 'last_name', 'phone'],
     },
 }
 
