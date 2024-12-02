@@ -44,11 +44,11 @@ class FarmerProfile(models.Model):
     delivery_days = MultiSelectField(max_length=50, choices=DAYS_OF_WEEK,default=["monday"] )
 
     def __str__(self):
-        return f"{self.farm_name} ({self.user.get_full_name()})"
+        return f"{self.farm_name} ({self.user.full_name})"
 
     @property
     def full_name(self):
-        return self.user.get_full_name()
+        return self.user.full_name
 
     @property
     def phone_number(self):
