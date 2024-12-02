@@ -46,6 +46,7 @@ class ProduceViewSet(viewsets.ModelViewSet):
         # Ensure the farmer has a profile
         farmer_profile, created = FarmerProfile.objects.get_or_create(user=user)
         serializer.save(farmer_profile=farmer_profile)
+    
     def create(self, request, *args, **kwargs):
         """
         Handle creation of Produce with associated images.
