@@ -62,28 +62,44 @@ class PinValidationSerializer(serializers.Serializer):
     pin_code = serializers.CharField()
 
     def validate(self, data):
+        """
+        Validate the provided PIN code and ensure the user can be activated.
+        """
         pin_code = data.get("pin_code")
 
-        # Retrieve phone number associated with the PIN
+        # Step 1: Retrieve phone number associated with the PIN
         phone_number = None
-        for key in cache.iter_keys("pin_*"):  # Efficient key lookup (Redis-compatible)
+        for key in cache.iter_keys("pin_*"):  # Search through PIN cache keys
             if cache.get(key) == pin_code:
-                phone_number = key.split("_")[1]  # Extract phone number from key
+                phone_number = key.split("_")[1]  # Extract phone number from the key
                 break
 
         if not phone_number:
             raise serializers.ValidationError("Invalid PIN or PIN has expired.")
 
-        # Retrieve user data from cache
+        # Step 2: Retrieve user data from cache
         user_data = cache.get(f"temp_user_{phone_number}")
         if not user_data:
             raise serializers.ValidationError("Session expired. Please request a new PIN.")
 
-        # Ensure no duplicate active user exists
+        # Step 3: Ensure no duplicate active user exists
         if CustomUser.objects.filter(phone_number=phone_number, is_active=True).exists():
             raise serializers.ValidationError("User is already activated.")
 
-        # Create and activate the user
+        # Attach necessary data for user creation
+        data['phone_number'] = phone_number
+        data['user_data'] = user_data
+
+        return data
+
+    def create(self, validated_data):
+        """
+        Create and activate the user based on validated data.
+        """
+        phone_number = validated_data['phone_number']
+        user_data = validated_data['user_data']
+
+        # Step 4: Create and activate the user
         user = CustomUser.objects.create_user(
             full_name=user_data['full_name'],
             phone_number=phone_number,
@@ -92,12 +108,11 @@ class PinValidationSerializer(serializers.Serializer):
             is_active=True,
         )
 
-        # Clear the cached data
+        # Step 5: Clear cached data
         cache.delete(f"temp_user_{phone_number}")
         cache.delete(f"pin_{phone_number}")
 
         return {"message": "User activated successfully."}
-
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):

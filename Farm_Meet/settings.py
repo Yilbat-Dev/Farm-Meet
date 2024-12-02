@@ -233,7 +233,7 @@ SOCIALACCOUNT_ADAPTER = 'users.adapters.CustomSocialAccountAdapter'
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'LOCATION': 'rediss://red-ct6u173qf0us738mhc6g:Y9fScVn77uTUNbbXCHnInVgs3NqJy0HU@ohio-redis.render.com:6379',  # Adjust to your Redis instance
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
