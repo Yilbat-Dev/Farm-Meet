@@ -82,7 +82,7 @@ MIDDLEWARE = [
 ]
 
 
-ALLOWED_HOSTS = ['farm-meet-1.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['farm-meet.onrender.com', 'localhost', '127.0.0.1']
 
 ROOT_URLCONF = "Farm_Meet.urls"
 
@@ -239,7 +239,7 @@ CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
         'LOCATION': 'rediss://red-ct6u173qf0us738mhc6g:Y9fScVn77uTUNbbXCHnInVgs3NqJy0HU@ohio-redis.render.com:6379',  # Adjust to your Redis instance
-        'OPTIONS': {
+        'OPTIONS': {'farm-meet.onrender.com' 
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
