@@ -3,7 +3,7 @@ from .models import FarmProduce, FarmerProfile,ProduceImage
 
 
 class FarmerProfileSerializer(serializers.HyperlinkedModelSerializer):
-    full_name = serializers.ReadOnlyField(source='user.get_full_name')
+    full_name = serializers.ReadOnlyField(source='user.full_name')
     phone_number = serializers.ReadOnlyField(source='user.phone_number')
 
     farm_category = serializers.ListField(

@@ -43,8 +43,7 @@ class FarmerProfile(models.Model):
     max_orders = models.PositiveIntegerField(default= 2)
     delivery_days = MultiSelectField(max_length=50, choices=DAYS_OF_WEEK,default=["monday"] )
 
-    def __str__(self):
-        return f"{self.farm_name} ({self.user.full_name})"
+    
 
     @property
     def full_name(self):
@@ -53,6 +52,9 @@ class FarmerProfile(models.Model):
     @property
     def phone_number(self):
         return self.user.phone_number
+
+    def __str__(self):
+        return f"{self.farm_name} ({self.user.full_name})"
 
 
 class FarmProduce(models.Model):

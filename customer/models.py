@@ -1,22 +1,38 @@
-# from django.db import models
-# from django.conf import settings
+from django.db import models
+from django.conf import settings
 
-# class CustomerProfile(models.Model):
-#     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-#     address = models.TextField()
-#     profile_picture = models.ImageField(upload_to='customers/profiles/', blank=True, null=True)
+class State(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    capital = models.CharField(max_length=100)  # Add a field for the capital
 
-#     def __str__(self):
-#         return self.user.username
+    def __str__(self):
+        return self.name
+
+class LGA(models.Model):
+    name = models.CharField(max_length=100)
+    state = models.ForeignKey(State, related_name='lgas', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.name} ({self.state.name})"
 
 
-# class Order(models.Model):
-#     customer = models.ForeignKey(CustomerProfile, on_delete=models.CASCADE)
-#     produce = models.ForeignKey('farmer.Produce', on_delete=models.CASCADE)
-#     quantity = models.PositiveIntegerField()
-#     delivery_option = models.CharField(max_length=255)  # Delivery options
-#     paid = models.BooleanField(default=False)
-#     order_date = models.DateTimeField(auto_now_add=True)
+class CustomerProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='customer_profile'
+    )
+    state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True, related_name="customer_profiles")
+    lga = models.ForeignKey(LGA, on_delete=models.SET_NULL, null=True, related_name="customer_profiles")
+    address = models.TextField()
+    @property
+    def full_name(self):
+        return self.user.full_name
 
-#     def __str__(self):
-#         return f"Order {self.id} - {self.produce.name} by {self.customer.user.username}"
+    @property
+    def phone_number(self):
+        return self.user.phone_number
+
+
+    def __str__(self):
+        return f"{self.user.phone_number}"

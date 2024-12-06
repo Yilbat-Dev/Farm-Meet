@@ -58,12 +58,15 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.facebook',
+    'django_celery_beat',
     
 
     # Custom apps
     'users',
     'farmer',
     'customer',
+    'orders',
+    'wallet'
 ]
 
 SITE_ID = 1
@@ -242,5 +245,23 @@ CACHES = {
         'OPTIONS': {'farm-meet.onrender.com' 
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
+    }
+}
+# Redis URL from Render
+REDIS_URL = os.getenv('rediss://red-ct6u173qf0us738mhc6g:Y9fScVn77uTUNbbXCHnInVgs3NqJy0HU@ohio-redis.render.com:6379', 'redis://localhost:6379/0')  # Replace default with Render's URL
+
+# Celery Configuration
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Africa/Lagos'
+
+# Django Caching (if using Redis for caching)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': REDIS_URL,
     }
 }

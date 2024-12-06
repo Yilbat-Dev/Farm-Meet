@@ -41,7 +41,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('', include('users.urls')),
     path('farmer/', include('farmer.urls')),
-    # path('customer/', include('customer.urls')),
+    path('customer/', include('customer.urls')),
     path('swagger<format>/', schema_view.without_ui(cache_timeout=0),
          name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger',
