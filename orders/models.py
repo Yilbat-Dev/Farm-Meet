@@ -1,7 +1,10 @@
 from django.db import models
 from customer.models import CustomerProfile
-from farmer.models import FarmProduce
+from farmer.models import FarmProduce, FarmerProfile
 from django.core.exceptions import ValidationError
+from django.utils.timezone import now  # Import now
+from datetime import timedelta  # Import timedelta for date manipulation
+from decimal import Decimal
 
 class Order(models.Model):
     ORDER_STATUS = [
@@ -14,7 +17,7 @@ class Order(models.Model):
         ('door_to_door', 'Door to Door Delivery'),
     ]
     customer = models.ForeignKey(CustomerProfile, on_delete=models.CASCADE, related_name="orders")
-    farmer = models.ForeignKey('FarmerProfile', on_delete=models.CASCADE, related_name="orders")
+    farmer = models.ForeignKey(FarmerProfile, on_delete=models.CASCADE, related_name="orders")
     produce = models.ManyToManyField(FarmProduce, through='OrderItem')
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     delivery_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
@@ -44,11 +47,19 @@ class Order(models.Model):
             farmer_wallet = self.farmer.wallet
             farmer_wallet.transfer_to_usable()
 
-# class OrderItem(models.Model):
-#     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-#     produce = models.ForeignKey(FarmProduce, on_delete=models.CASCADE)
-#     quantity = models.PositiveIntegerField()
-#     price = models.DecimalField(max_digits=10, decimal_places=2)
+    def calculate_subtotal(self):
+        self.subtotal = sum(item.total_price for item in self.items.all())
+        self.save()
+
+    def calculate_total(self):
+        self.total_amount = self.subtotal + self.delivery_amount + self.service_fee
+        self.save()
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    produce = models.ForeignKey(FarmProduce, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
 
 
 class Payment(models.Model):
