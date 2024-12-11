@@ -14,7 +14,8 @@ class Order(models.Model):
         ('door_to_door', 'Door to Door Delivery'),
     ]
     customer = models.ForeignKey(CustomerProfile, on_delete=models.CASCADE, related_name="orders")
-    items = models.ManyToManyField(FarmProduce, through='OrderItem')
+    farmer = models.ForeignKey('FarmerProfile', on_delete=models.CASCADE, related_name="orders")
+    produce = models.ManyToManyField(FarmProduce, through='OrderItem')
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     delivery_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     service_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
@@ -30,8 +31,32 @@ class Order(models.Model):
     def delete(self, *args, **kwargs):
         raise ValidationError("Deleting orders is not allowed.")
 
-class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    produce = models.ForeignKey(FarmProduce, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    def process_payment(self):
+        """Add payment to farmer's wallet when order is placed."""
+        farmer_wallet = self.farmer.wallet
+        farmer_wallet.add_payment(self.delivery_amount, self.payment_reference)
+
+    def mark_as_delivered(self):
+        """Transfer payment to usable wallet upon delivery confirmation."""
+        if not self.is_delivered:
+            self.is_delivered = True
+            self.save()
+            farmer_wallet = self.farmer.wallet
+            farmer_wallet.transfer_to_usable()
+
+# class OrderItem(models.Model):
+#     order = models.ForeignKey(Order, on_delete=models.CASCADE)
+#     produce = models.ForeignKey(FarmProduce, on_delete=models.CASCADE)
+#     quantity = models.PositiveIntegerField()
+#     price = models.DecimalField(max_digits=10, decimal_places=2)
+
+
+class Payment(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='payment')
+    transaction_id = models.CharField(max_length=255, unique=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=50, choices=[('successful', 'Successful'), ('failed', 'Failed')])
+
+    def __str__(self):
+        return f"Payment {self.transaction_id} - {self.status}"
