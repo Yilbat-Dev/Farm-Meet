@@ -10,13 +10,27 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-from pathlib import Path
+
 from datetime import timedelta
+import dj_database_url
 import os
 from pathlib import Path
-import dj_database_url
+import environ
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+# Initialize environment variables
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, 'api.env'))  # Explicitly load .env file
+
+# Flutterwave API Keys
+FLW_SECRET_KEY = env('FLW_SECRET_KEY', default=None)
+FLW_PUBLIC_KEY = env('FLW_PUBLIC_KEY', default=None)
+FLW_ENCRYPTION_KEY = env('FLW_ENCRYPTION_KEY', default=None)
+FLW_BASE_URL = env('FLW_BASE_URL', default='https://api.flutterwave.com/v3')
+
 
 
 # Bind to the port from the environment variable or default to 10000
@@ -185,7 +199,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
 }
 

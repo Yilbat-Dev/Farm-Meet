@@ -15,7 +15,7 @@ from customer.serializers import CustomerProfileSerializer
 #             user = self.context['request'].user
 #             if user.role != 'customer':  # Adjust 'role' to match your CustomUser field
 #                 raise serializers.ValidationError("Only customers can make orders")
-#             return attrs
+#             return attrs0
 
 class OrderItemSerializer(serializers.ModelSerializer):
     total_price = serializers.ReadOnlyField()

@@ -3,7 +3,7 @@ from rest_framework import generics, permissions, viewsets
 from .models import Order
 from farmer.models import FarmerProfile, FarmProduce
 from .serializers import OrderSerializer
-from .permissions import IsOrderOwnerOrReadOnly
+
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 
@@ -17,7 +17,6 @@ class OrderViewSet(viewsets.ModelViewSet):
     """
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         """
