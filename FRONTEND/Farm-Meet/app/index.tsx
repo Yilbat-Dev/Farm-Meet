@@ -10,29 +10,19 @@ const GreenScreen: React.FC = () => {
   const router = useRouter();
   const currentPath = usePathname(); // Get the current pathname here
 
-  const [loaded, error] = useFonts({
-    "SchibstedGrotesk-Medium": require("../assets/fonts/SchibstedGrotesk-Medium.otf"), 
-    "SchibstedGrotesk-Regular": require("../assets/fonts/SchibstedGrotesk-Regular.otf"),
-    "SchibstedGrotesk-MediumItalic": require("../assets/fonts/SchibstedGrotesk-MediumItalic.otf"), 
-    "SchibstedGrotesk-BoldItalic": require("../assets/fonts/SchibstedGrotesk-BoldItalic.otf"),   
-    "SchibstedGrotesk-SemiBold": require("../assets/fonts/SchibstedGrotesk-SemiBold.otf"), 
-    "SchibstedGrotesk-ExtraBold": require("../assets/fonts/SchibstedGrotesk-ExtraBold.otf"),   
-    "SchibstedGroteskBold": require("../assets/fonts/SchibstedGroteskBold.otf"),   
-    "Montserrat": require("../assets/fonts/Montserrat-Bold.ttf"),  
-    "Schibsted_Variable": require("../assets/fonts/SchibstedGrotesk-VariableFont_wght.ttf"),
-    "SchibstedItalic_Variable": require("../assets/fonts/SchibstedGrotesk-Italic-VariableFont_wght.ttf"),
-  });
-
   useEffect(() => {
-    if (loaded || error) {
-      SplashScreen.hideAsync();
-    }
+    // if (loaded || error) {
+    //   SplashScreen.hideAsync();
+    // }
     const timeout = setTimeout(() => {
       router.push('/splash-1');
     }, 3000);
 
     return () => clearTimeout(timeout);
-  }, [loaded, error, router]);
+  }, [
+    // loaded, 
+    // error, 
+    router]);
 
   useEffect(() => {
     const backAction = () => {
@@ -51,9 +41,9 @@ const GreenScreen: React.FC = () => {
     router.replace('/splash-1');
   };
 
-  if (!loaded && !error) {
-    return null;
-  }
+  // if (!loaded && !error) {
+  //   return null;
+  // }
 
   const { width, height } = Dimensions.get('window');
 
@@ -96,8 +86,8 @@ const styles = StyleSheet.create({
 
   //logo -------------
   logoImage: {
-    width: 70, // 20% of screen width
-    height: 73, // 10% of screen height
+    width: 70,
+    height: 73, 
     resizeMode: 'contain',
     marginBottom: 5,
   },

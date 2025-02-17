@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'expo-router';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Modal,
   Alert,
+  BackHandler,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/FontAwesome'; // Icon library
@@ -96,6 +97,25 @@ export default function Register() {
       setIsSubmitting(false);
     }
   };
+
+
+  const currentPath = usePathname(); // Get the current pathname here
+  useEffect(() => {
+
+    // Only handle the back button on the SignIn screen
+    if (currentPath === '/auth/register') {
+      const backAction = () => {
+        // Redirect to splash screen when back button is pressed
+        router.replace('/splash-1'); // Replace current screen with splash screen
+        return true; // Prevent default back behavior
+      };
+  
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+  
+      // Cleanup the event listener
+      return () => backHandler.remove();
+    }
+  }, [currentPath, router]);
 
   return (
     <View style={styles.container}>

@@ -1,18 +1,17 @@
 import { usePathname, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, BackHandler } from 'react-native';
-import { ProgressBar } from 'react-native-paper'; // Install this library: npm install react-native-paper
+import { ProgressBar } from 'react-native-paper';
 
 const SplashScreen = () => {
   const router = useRouter();
-  const [currentIndex, setCurrentIndex] = useState(0); // To track the current image and progress
+  const [currentIndex, setCurrentIndex] = useState(0);
   const images = [
     require('../assets/vegetables.jpg'), // Image 1
     require('../assets/onion.jpg'),       // Image 2
-    require('../assets/cabbage.jpg'),       // Image 3
+    require('../assets/cabbage.jpg'),     // Image 3
   ];
 
-  // Update progress bar values based on current index
   const progressValues = [
     { progress1: 1, progress2: 0.9, progress3: 0.9 },
     { progress1: 0.9, progress2: 1, progress3: 0.9 },
@@ -25,121 +24,98 @@ const SplashScreen = () => {
     "Arriving Fresh at Your Table",        // Text for Image 3
   ];
 
-  // Use refs to store the interval and timeout IDs
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Change image and progress every 3 seconds
-  useEffect(() => {
+  const startTimers = () => {
     intervalRef.current = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 2000); // Change image every 3 seconds
+    }, 2500); // Change image every 3 seconds
 
-    // After 9 seconds (3 cycles of 3 seconds), navigate to the login screen
     timeoutRef.current = setTimeout(() => {
       router.push('/auth/login');
-    }, 6000);
+    }, 7500); // Navigate to login after 9 seconds (3 images * 3 seconds)
+  };
+
+  const stopTimers = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  };
+
+  useEffect(() => {
+    startTimers();
 
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current); // Cleanup interval on unmount
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);    // Cleanup timeout on unmount
+      stopTimers();
     };
   }, [router]);
 
-  // // Handle back button press
-  // useEffect(() => {
-  //   const backAction = () => {
-  //     // Exit the app when the back button is pressed
-  //     BackHandler.exitApp();
-  //     return true; // Prevent default back behavior
-  //   };
+  const handleButtonPress = (route: string) => {
+    stopTimers();
+    router.replace(route);
+  };
 
-  //   // Add event listener for back button press
-  //   const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+  const currentPath = usePathname();
 
-  //   // Cleanup the event listener
-  //   return () => backHandler.remove();
-  // }, []);
+  useEffect(() => {
+    if (currentPath === '/splash-1') {
+      const backAction = () => {
+        router.replace('/');
+        return true;
+      };
 
-                              // // Function to stop timers and navigate
-                              // const navigateWithTimerCleanup = (route: string) => {
-                              //   // Clear the interval and timeout
-                              //   if (intervalRef.current) clearInterval(intervalRef.current);
-                              //   if (timeoutRef.current) clearTimeout(timeoutRef.current);
-
-                              //   // Navigate to the desired route
-                              //   router.push('/auth/login');
-                              // };
-  const currentPath = usePathname(); // Get the current pathname here
-
-    // Handle back button press
-    useEffect(() => {
-  
-      // Only handle the back button on the SignIn screen
-      if (currentPath === '/splash-1') {
-        const backAction = () => {
-          // Redirect to splash screen when back button is pressed
-          router.replace('/'); // Replace current screen with splash screen
-          return true; // Prevent default back behavior
-        };
-    
-        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-    
-        // Cleanup the event listener
-        return () => backHandler.remove();
-      }
-    }, [currentPath, router]);
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+      return () => backHandler.remove();
+    }
+  }, [currentPath, router]);
 
   return (
     <View style={styles.container}>
-      {/* Background Image */}
       <ImageBackground
-        source={images[currentIndex]} // Update background image dynamically
+        source={images[currentIndex]}
         style={styles.backgroundImage}
       >
         <View style={styles.ovalShape}/>
-        {/* Lower Section */}
         <View style={styles.lowerSection}>
           <View style={styles.progressContainer}>
-              <ProgressBar
-                progress={progressValues[currentIndex].progress1}
-                color={progressValues[currentIndex].progress1 === 1 ? "#fff" : "#3e502d"} // White for active
-                style={[styles.progressBar, { 
-                  width: progressValues[currentIndex].progress1 === 1 ? 10 : 4, // Adjust width
-                  height: progressValues[currentIndex].progress1 === 1 ? 4 : 4  // Adjust height
-                }]}
-              />
-              <ProgressBar
-                progress={progressValues[currentIndex].progress2}
-                color={progressValues[currentIndex].progress2 === 1 ? "#fff" : "#3e502d"} // White for active
-                style={[styles.progressBar, { 
-                  width: progressValues[currentIndex].progress2 === 1 ? 10 : 4, // Adjust width
-                  height: progressValues[currentIndex].progress2 === 1 ? 4 : 4  // Adjust height
-                }]}
-              />
-              <ProgressBar
-                progress={progressValues[currentIndex].progress3}
-                color={progressValues[currentIndex].progress3 === 1 ? "#fff" : "#3e502d"} // White for active
-                style={[styles.progressBar, { 
-                  width: progressValues[currentIndex].progress3 === 1 ? 10 : 4, // Adjust width
-                  height: progressValues[currentIndex].progress3 === 1 ? 4 : 4  //Adjust height
-                }]}
-              />
+            <ProgressBar
+              progress={progressValues[currentIndex].progress1}
+              color={progressValues[currentIndex].progress1 === 1 ? "#fff" : "#3e502d"}
+              style={[styles.progressBar, { 
+                width: progressValues[currentIndex].progress1 === 1 ? 10 : 4,
+                height: progressValues[currentIndex].progress1 === 1 ? 4 : 4
+              }]}
+            />
+            <ProgressBar
+              progress={progressValues[currentIndex].progress2}
+              color={progressValues[currentIndex].progress2 === 1 ? "#fff" : "#3e502d"}
+              style={[styles.progressBar, { 
+                width: progressValues[currentIndex].progress2 === 1 ? 10 : 4,
+                height: progressValues[currentIndex].progress2 === 1 ? 4 : 4
+              }]}
+            />
+            <ProgressBar
+              progress={progressValues[currentIndex].progress3}
+              color={progressValues[currentIndex].progress3 === 1 ? "#fff" : "#3e502d"}
+              style={[styles.progressBar, { 
+                width: progressValues[currentIndex].progress3 === 1 ? 10 : 4,
+                height: progressValues[currentIndex].progress3 === 1 ? 4 : 4
+              }]}
+            />
           </View>
 
-          {/* image text */}
           <Text style={styles.farmersText}>
             {imageTexts[currentIndex]}
           </Text>
 
-          <TouchableOpacity onPress={() => router.replace('/auth/register')} style={styles.signupButton}>
+          <TouchableOpacity onPress={() => handleButtonPress('/auth/register')} style={styles.signupButton}>
             <Text style={styles.signupText}>Sign Up</Text>
           </TouchableOpacity>
           <View style={styles.redirectSignin}>
             <Text style={styles.signinText}>
-            Already have an account? 
+              Already have an account? 
             </Text>
-            <Text onPress={() => router.replace('/auth/login')} style={styles.signinLink}>
+            <Text onPress={() => handleButtonPress('/auth/login')} style={styles.signinLink}>
               Sign In
             </Text>
           </View>
@@ -148,6 +124,7 @@ const SplashScreen = () => {
     </View>
   );
 };
+
 
 
 const styles = StyleSheet.create({
@@ -175,21 +152,10 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     marginTop: 80,
   },
-  // progressBarActive: {
-  //   width: 12,
-  //   height: 3,
-  //   borderRadius: 5,
-  //   marginHorizontal: 3,
-  // },
-  // progressBarInactive: {
-  //   width: 4,
-  //   height: 3,
-  //   borderRadius: 10,
-  //   marginHorizontal: 3,
-  // },
+
   farmersText: {
     fontFamily: "SchibstedGrotesk-Regular",
-    fontSize: 18,
+    fontSize: 17,
     marginBottom: 30,
     color: '#fff',
   },
@@ -212,14 +178,14 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   signinText: {
-    fontFamily: "SchibstedGrotesk-Regular",
+    fontFamily: "SchibstedGrotesk-Medium",
     color: '#fff',
     fontSize: 13,
     paddingRight: 5,
   },
   signinLink: {
     color: '#fff',
-    fontFamily: "SchibstedGrotesk-Regular",
+    fontFamily: "SchibstedGrotesk-Medium",
     fontSize: 14,
     textDecorationLine: 'underline',
   },
