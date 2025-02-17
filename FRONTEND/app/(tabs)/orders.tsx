@@ -1,80 +1,96 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import OrderCardOP from '../../components/orderCardOP'; // the orderCard component
 import AntDesign from '@expo/vector-icons/AntDesign';
+import * as SecureStore from 'expo-secure-store'; // Import SecureStore
 
 // Define the type for the order object
-type Order = {
-  id: string;
-  imageUrl: string; // URL for the product image
-  productName: string;
-  productQuantity: string;
-  productPrice: string;
-  status: string;
-  customerName: string;
-  location: string;
-};
+type Order =  {
+  id: number;
+  farmer : number;
+  customer_name: string;
+  produce : number;
+  produce_name : string;
+  produce_image : string;
+  price: string;
+  quantity: number;
+  total: string;
+  delivery_status: string;
+  payment_status: string;
+  created_at: string;
+  delivery_date: string;
+}
 
 const OrderPage: React.FC = () => {
   const [selectedButton, setSelectedButton] = useState<string>('Due'); // State to track selected button
+  const [orders, setOrders] = useState<Order[]>([]); // State to store fetched orders
+  const [loading, setLoading] = useState<boolean>(true); // State to track loading status
+  const [error, setError] = useState<string | null>(null); // State to track errors
+  const [searchQuery, setSearchQuery] = useState<string>(''); // State to track search query
 
-  const orders = [
-    {
-      id: '1',
-      imageUrl: '../assets/onion.jpg',
-      productName: 'Green Lettuce',
-      productQuantity: '2',
-      productPrice: '1000',
-      status: 'Pending',
-      customerName: 'Paulina Gayoso',
-      location: 'Abuja - 602020',
-    },
-    {
-      id: '2',
-      imageUrl: '../assets/onion.jpg',
-      productName: 'Green Lettuce',
-      productQuantity: '2',
-      productPrice: '1000',
-      status: 'Pending',
-      customerName: 'Paulina Gayoso',
-      location: 'Abuja - 602020',
-    },
-    {
-      id: '3',
-      imageUrl: '../assets/onion.jpg',
-      productName: 'Green Lettuce',
-      productQuantity: '2',
-      productPrice: '1000',
-      status: 'Pending',
-      customerName: 'Paulina Gayoso',
-      location: 'Abuja - 602020',
-    },
-    {
-      id: '4',
-      imageUrl: '../assets/onion.jpg',
-      productName: 'Green Lettuce',
-      productQuantity: '2',
-      productPrice: '1000',
-      status: 'Pending',
-      customerName: 'Paulina Gayoso',
-      location: 'Abuja - 602020',
-    },
-    // Add more orders here
-  ];
+  useEffect(() => {
+    const fetchOrderItems = async () => {
+      try {
+        const token = await SecureStore.getItemAsync('accessToken');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        const response = await fetch('https://farm-meet-snj4.onrender.com/order/orderitems/', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          const errorResponse = await response.json();
+          console.error('API Error:', response.status, errorResponse);
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        console.log("API Response:", data);
+
+        // Ensure the data is an array before updating the state
+        if (Array.isArray(data)) {
+          setOrders(data);
+        } else {
+          throw new Error('Received data is not an array');
+        }
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+        setError('Failed to fetch orders. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+
+    };
+
+    fetchOrderItems(); // Call the fetch function
+  }, []); // Empty dependency array ensures this runs only once on mount
 
   // Filter orders based on the selected button
-  const filteredOrders = orders.filter((order) => order.status === selectedButton);
+  const filteredOrders = Array.isArray(orders) ? orders.filter((order) => {
+    const matchesStatus = order.delivery_status.toLowerCase() === selectedButton.toLowerCase();
+    const matchesSearch = order.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||  
+      order.produce_name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesStatus && matchesSearch;
+  }) : [];
 
   return (
     <ScrollView style={styles.scroller}>
       <View style={styles.container}>
         <View style={styles.searchbar}>
-            <AntDesign style={styles.searchIcon} name="search1" size={24} color="#dcdcdc" />
-            <TextInput
-                style={styles.textPart}
-                placeholder='Search . . .'
-                placeholderTextColor='#ccced0'
-                />
+          <AntDesign style={styles.searchIcon} name="search1" size={24} color="#dcdcdc" />
+          <TextInput
+            style={styles.textPart}
+            placeholder='Search . . .'
+            placeholderTextColor='#ccced0'
+            value={searchQuery}
+            onChangeText={(text) => setSearchQuery(text)} // Update search query as user types
+          />
         </View>
         {/* Scrollable Buttons */}
         <View style={styles.scrollOptions}>
@@ -92,7 +108,7 @@ const OrderPage: React.FC = () => {
                   selectedButton === 'Due' && styles.selectedButtonText,
                 ]}
               >
-                Due (0)
+                Due ({orders.filter((order) => order.delivery_status.toLowerCase() === 'due').length})
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -108,7 +124,7 @@ const OrderPage: React.FC = () => {
                   selectedButton === 'Pending' && styles.selectedButtonText,
                 ]}
               >
-                Pending (0)
+                Pending ({orders.filter((order) => order.delivery_status.toLowerCase() === 'pending').length})
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -124,7 +140,7 @@ const OrderPage: React.FC = () => {
                   selectedButton === 'Completed' && styles.selectedButtonText,
                 ]}
               >
-                Completed (0)
+                Completed ({orders.filter((order) => order.delivery_status.toLowerCase() === 'completed').length})
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -140,18 +156,29 @@ const OrderPage: React.FC = () => {
                   selectedButton === 'Cancelled' && styles.selectedButtonText,
                 ]}
               >
-                Cancelled (0)
+                Cancelled ({orders.filter((order) => order.delivery_status.toLowerCase() === 'cancelled').length})
               </Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
 
         {/* Orders */}
-        <View style={styles.orders}>
-          {filteredOrders.map((order) => (
-            <OrderCardOP key={order.id} order={order} />
-          ))}
-        </View>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size={60} color="#529500" style={{ marginTop: 50 }} />
+          </View>
+        ) : (
+          <View style={styles.orders}>
+            {/* Only show "No orders here" below the search bar */}
+            {filteredOrders.length === 0 ? (
+              <Text style={styles.noOrdersText}>No orders here</Text>
+            ) : (
+              filteredOrders.map((order) => (
+                <OrderCardOP key={order.id} order={order} />
+              ))
+            )}
+          </View>
+        )}
       </View>
     </ScrollView>
   );
@@ -218,6 +245,29 @@ const styles = StyleSheet.create({
   },
   orders: {
     width: '90%',
+  },
+
+  //added later
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
+  },
+  noOrdersText: {
+    fontFamily : "SchibstedGrotesk-MediumItalic",
+    fontSize : 16,
+    textAlign: 'center',
+    color: '#888',
+    marginTop: 20,
   },
 });
 

@@ -5,14 +5,17 @@ import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 
 // Define the type for the order object
 type Order = {
-    id: string;
-    imageUrl: string; // URL for the product image
-    productName: string;
-    productQuantity: string;
-    productPrice: string;
-    status: string;
-    customerName: string;
-    location: string;
+    id: number;
+    order: number;
+    farmer : number;
+    produce : number;
+    price: string;
+    quantity: number;
+    total: string;
+    delivery_status: string;
+    payment_status: string;
+    created_at: string;
+    delivery_date: string;
   };
   
   // Define the props for the OrderCard component
@@ -47,7 +50,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
         </View>
         <View style={styles.lowerRow}>
             <View style={styles.viewButton}>
-            <Text style={[styles.buttonText, { color: order.status === 'Pending'? 'red' : 'black' }]}>Pending</Text>
+            <Text style={[styles.buttonText, { color: order.delivery_status === 'Pending'? 'red' : 'black' }]}>Pending</Text>
             </View>
             <View style={styles.viewButton}>
             <Text style={styles.buttonText}>Paulina Gayoso</Text>

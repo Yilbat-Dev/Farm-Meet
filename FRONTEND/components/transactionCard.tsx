@@ -12,8 +12,8 @@ interface TransactionCardProps {
 }
 
 const TransactionCard: React.FC<TransactionCardProps> = ({ type, amount, date, status }) => {
-    const iconName = type === 'withdraw' ? 'return-down-back' : 'return-up-forward';
-    const iconColor = type === 'withdraw' ? '#fff' : '#fff';
+    // const iconName = type === 'withdraw' ? 'return-down-back' : 'return-up-forward';
+    // const iconColor = type === 'withdraw' ? '#fff' : '#fff';
     const statusColor = status === 'Success' ? '#4CAF50' : status === 'Pending' ? '#FFBC7C' : '#FF3B30';
 
     return (
@@ -21,10 +21,10 @@ const TransactionCard: React.FC<TransactionCardProps> = ({ type, amount, date, s
             <View style={styles.iconContainer}>
                 {/* <Ionicons name={iconName} size={24} color={iconColor} /> */}
                 {/* <MaterialIcons name="keyboard-return" size={24} color="black" /> */}
-                <Ionicons name={iconName} size={24} color={iconColor}/>
+                <Ionicons name='return-down-back' size={24} color='#fff'/>
             </View>
             <View style={styles.textContainer}>
-                <Text style={styles.transactionType}>You {type}</Text>
+                <Text style={styles.transactionType}>{type}</Text>
                 <Text style={styles.transactionDate}>{date}</Text>
             </View>
             <Text style={styles.amount}>{amount}</Text>

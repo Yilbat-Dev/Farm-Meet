@@ -36,6 +36,11 @@ export default function Register() {
       return;
     }
 
+    if (password.length < 6) {
+      setErrorMessage('Password must be at least 6 characters long.');
+      setErrorModalVisible(true);
+      return;
+    }
     setIsSubmitting(true);
 
     const user = {
@@ -47,7 +52,7 @@ export default function Register() {
 
     try {
       const response = await fetch(
-        'https://farm-meet.onrender.com/users/register-generate-pin/',
+        'https://farm-meet-snj4.onrender.com/users/register-generate-pin/',
         {
           method: 'POST',
           headers: {

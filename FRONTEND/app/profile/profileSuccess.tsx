@@ -38,7 +38,7 @@ export default function profilePage({ navigation }: Props) {
               <AntDesign name="check" size={35} color="#fff" />
           </View>
       {/* Welcome Text */}
-      <Text style={styles.welcomeText}>Profile Updated Successfully!</Text>
+      <Text style={styles.welcomeText}>Profile has been created Successfully!</Text>
 
       {/* Subheading */}
       <Text style={styles.infoText}>
@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
     marginBottom: 20,
+    width: "70%",
   },
   infoText: {
     fontFamily: 'SchibstedGrotesk-Regular',

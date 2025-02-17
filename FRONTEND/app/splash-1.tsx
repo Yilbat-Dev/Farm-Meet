@@ -1,12 +1,11 @@
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
+import { usePathname, useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, BackHandler } from 'react-native';
 import { ProgressBar } from 'react-native-paper'; // Install this library: npm install react-native-paper
 
 const SplashScreen = () => {
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0); // To track the current image and progress
-  const [timerDone, setTimerDone] = useState(false); // Track the timer status
   const images = [
     require('../assets/vegetables.jpg'), // Image 1
     require('../assets/onion.jpg'),       // Image 2
@@ -26,26 +25,70 @@ const SplashScreen = () => {
     "Arriving Fresh at Your Table",        // Text for Image 3
   ];
 
+  // Use refs to store the interval and timeout IDs
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Change image and progress every 3 seconds
   useEffect(() => {
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 3000); // Change image every 3 seconds
+    }, 2000); // Change image every 3 seconds
 
     // After 9 seconds (3 cycles of 3 seconds), navigate to the login screen
-              const timeout = setTimeout(() => {
-                router.push('/auth/login');
-              }, 9000);
+    timeoutRef.current = setTimeout(() => {
+      router.push('/auth/login');
+    }, 6000);
 
     return () => {
-      clearInterval(interval); // Cleanup interval on unmount
-              clearTimeout(timeout);    // Cleanup timeout on unmount
+      if (intervalRef.current) clearInterval(intervalRef.current); // Cleanup interval on unmount
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);    // Cleanup timeout on unmount
     };
   }, [router]);
 
+  // // Handle back button press
+  // useEffect(() => {
+  //   const backAction = () => {
+  //     // Exit the app when the back button is pressed
+  //     BackHandler.exitApp();
+  //     return true; // Prevent default back behavior
+  //   };
 
+  //   // Add event listener for back button press
+  //   const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
 
+  //   // Cleanup the event listener
+  //   return () => backHandler.remove();
+  // }, []);
 
+                              // // Function to stop timers and navigate
+                              // const navigateWithTimerCleanup = (route: string) => {
+                              //   // Clear the interval and timeout
+                              //   if (intervalRef.current) clearInterval(intervalRef.current);
+                              //   if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+                              //   // Navigate to the desired route
+                              //   router.push('/auth/login');
+                              // };
+  const currentPath = usePathname(); // Get the current pathname here
+
+    // Handle back button press
+    useEffect(() => {
+  
+      // Only handle the back button on the SignIn screen
+      if (currentPath === '/splash-1') {
+        const backAction = () => {
+          // Redirect to splash screen when back button is pressed
+          router.replace('/'); // Replace current screen with splash screen
+          return true; // Prevent default back behavior
+        };
+    
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    
+        // Cleanup the event listener
+        return () => backHandler.remove();
+      }
+    }, [currentPath, router]);
 
   return (
     <View style={styles.container}>
@@ -88,18 +131,15 @@ const SplashScreen = () => {
           <Text style={styles.farmersText}>
             {imageTexts[currentIndex]}
           </Text>
-          {/* <Text style={styles.farmersText}>
-            Freshly Harvested By Local Farmers
-          </Text> */}
 
-          <TouchableOpacity onPress={() => router.push('/auth/signup')} style={styles.signupButton}>
+          <TouchableOpacity onPress={() => router.replace('/auth/register')} style={styles.signupButton}>
             <Text style={styles.signupText}>Sign Up</Text>
           </TouchableOpacity>
           <View style={styles.redirectSignin}>
             <Text style={styles.signinText}>
             Already have an account? 
             </Text>
-            <Text onPress={() => router.push('/auth/login')} style={styles.signinLink}>
+            <Text onPress={() => router.replace('/auth/login')} style={styles.signinLink}>
               Sign In
             </Text>
           </View>
@@ -108,6 +148,7 @@ const SplashScreen = () => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {

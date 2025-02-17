@@ -66,7 +66,7 @@ const handleBackspace = (value: string, index: number) => {
 
     try {
       const response = await fetch(
-        "https://farm-meet.onrender.com/users/register-pin-validate/",
+        "https://farm-meet-snj4.onrender.com/users/register-pin-validate/",
         {
           method: "POST",
           headers: {
@@ -83,7 +83,7 @@ const handleBackspace = (value: string, index: number) => {
       if (response.ok) {
         // If OTP validation is successful
         // Alert.alert("Success", "OTP verified successfully.");
-        router.push("/auth/register"); // Redirect to login page
+        router.push("/auth/login"); // Redirect to login page
       } else {
         // Handle error response
         Alert.alert("Error", data.message || `Invalid OTP. Please try again: ${response.status}`);
@@ -207,8 +207,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   resendButton: {
-    borderWidth: 1,
-    borderColor: "#696969", // Dark green
     paddingVertical: 15,
     height: 55,
     borderRadius: 10,
@@ -216,7 +214,7 @@ const styles = StyleSheet.create({
   },
   resendButtonText: {
     fontFamily: "SchibstedGrotesk-Medium",
-    color: "#696969", // Dark green
+    color: "#529500", // Dark green
     fontSize: 16,
   },
   footer: {

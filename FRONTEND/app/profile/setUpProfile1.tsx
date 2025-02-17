@@ -220,19 +220,11 @@ export default function ProfilePage() {
 
       formData.append('farm_name', JSON.stringify(farmName));
       formData.append('description', JSON.stringify(farmDescription));
-      // selectedItems.forEach((category) =>
-      //     formData.append('farm_category', category)
-      //   );
-      // formData.append('farm_category', JSON.stringify(selectedItems));
-      // formData.append('farm_category', selectedItems.join(', '));
       if (farmCatDrop.length > 0) {
         formData.append('farm_category', JSON.stringify(farmCatDrop)); // Send as JSON array
       }
       formData.append('farm_address', JSON.stringify(farmAddress));
       formData.append('email', JSON.stringify(email));
-      // formData.append('farm_size', 'large');
-      // formData.append('max_orders', '56');
-      // formData.append('delivery_days', 'monday');
 
 
       if (profilePicture) {
@@ -266,9 +258,6 @@ export default function ProfilePage() {
     router.push('/profile/farmOperations');
       
     
-    
-    
-    
       //   // ✅ Log form data before submission ************************* new entry
       //   console.log('Submitting FormData:');
       //   formData.forEach((value, key) => {
@@ -292,6 +281,7 @@ export default function ProfilePage() {
       //   console.error('Error response:', responseData);
       //   setErrorModalVisible(true);
       // }
+
     } catch (error) {
       setErrorMessage('An error occurred while saving the profile.');
       console.error('Error saving profile:', error);
@@ -417,12 +407,12 @@ export default function ProfilePage() {
 
       <View style={styles.footer}>
       <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
-        <Text style={styles.saveButtonText}>Save And Continue</Text>
+        <Text style={styles.saveButtonText}>Continue</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.DButton} onPress={()=>router.push('/profile/farmOperations')}>
+      {/* <TouchableOpacity style={styles.DButton} onPress={()=>router.push('/profile/farmOperations')}>
         <Text style={styles.DButtonText}>Dev Check</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       </View>
 
       {/* Error Modal */}

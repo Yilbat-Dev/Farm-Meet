@@ -207,7 +207,6 @@ const styles = StyleSheet.create({
     fontFamily: "SchibstedGroteskBold",
   },
   resendButton: {
-    borderWidth: 1,
     borderColor: "#696969", // Dark green
     paddingVertical: 15,
     height: 55,
@@ -216,7 +215,7 @@ const styles = StyleSheet.create({
   },
   resendButtonText: {
     fontFamily: "SchibstedGrotesk-Medium",
-    color: "#696969", // Dark green
+    color: "#529500", // Dark green
     fontSize: 16,
   },
   otpBoxFilled: {

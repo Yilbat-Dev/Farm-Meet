@@ -48,13 +48,14 @@ export default function SuccessPage({ navigation }: Props) {
       <TouchableOpacity 
         style={styles.setupButton} 
         onPress={() => router.push('/profile/setUpProfile1')}
-      >
+        >
         <Text style={styles.setupButtonText}>Set Up Profile</Text>
       </TouchableOpacity>
 
       <TouchableOpacity 
         style={styles.skipButton} 
-        onPress={() => navigation.navigate('Home')}
+        onPress={() => router.push('/(tabs)/dashboard')}
+        // onPress={() => navigation.navigate('Home')}
       >
         <Text style={styles.skipButtonText}>Skip</Text>
       </TouchableOpacity>
@@ -100,15 +101,13 @@ const styles = StyleSheet.create({
   },
   skipButton: {
     backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#696969', // Dark green border
     borderRadius: 10,
     paddingVertical: 15,
     // paddingHorizontal: 50,
   },
   skipButtonText: {
     fontFamily: 'SchibstedGrotesk-Medium',
-    color: '#042D1F', // Dark green text
+    color: '#529500', // Dark green text
     fontSize: 16,
     textAlign: 'center',
   },

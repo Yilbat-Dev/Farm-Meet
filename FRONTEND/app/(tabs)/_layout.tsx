@@ -3,7 +3,7 @@ import Feather from '@expo/vector-icons/Feather';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Tabs } from 'expo-router';
+import { router, Tabs } from 'expo-router';
 import TabBar from '../../components/TabBar';
 import { View, Text, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -31,22 +31,22 @@ export default function TabLayout() {
             fontSize: 20,
             fontFamily:"SchibstedGroteskBold",
             },
-          headerRight: () => (
-            <TouchableOpacity style={{
-              backgroundColor: '#White',
-              borderWidth: 1,
-              borderColor: "#d3d3d3",
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginRight: 20, // Adjust spacing
-            }}
-            onPress={() => console.log('Notification icon pressed')}>
-              <Ionicons name="notifications-outline" size={24} color="#7D7A7A" />
-            </TouchableOpacity>
-          ), 
+          // headerRight: () => (
+          //   // <TouchableOpacity style={{
+          //   //   backgroundColor: '#White',
+          //   //   borderWidth: 1,
+          //   //   borderColor: "#d3d3d3",
+          //   //   width: 40,
+          //   //   height: 40,
+          //   //   borderRadius: 20,
+          //   //   justifyContent: 'center',
+          //   //   alignItems: 'center',
+          //   //   marginRight: 20, // Adjust spacing
+          //   // }}
+          //   // onPress={() => console.log('Notification icon pressed')}>
+          //   //   <Ionicons name="notifications-outline" size={24} color="#7D7A7A" />
+          //   // </TouchableOpacity>
+          // ), 
         }}
         />
       <Tabs.Screen
@@ -101,7 +101,7 @@ export default function TabLayout() {
                   alignItems: 'center',
                   marginRight: 20, // Adjust spacing
                 }}
-                onPress={() => console.log('Plus icon pressed')}>
+                onPress={() => {router.push('/profile/farmProduce')}}>
                   <Feather name="plus" size={24} color="white" />
                 </TouchableOpacity>
               ),
@@ -111,7 +111,7 @@ export default function TabLayout() {
         name="dashProfile"
         options={{
             title: 'Profile',
-            headerShown: true,
+            headerShown: false,
             headerTitleAlign:"left", 
             headerShadowVisible: false,
             headerTitleStyle: {

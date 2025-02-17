@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { router, useRouter } from 'expo-router';
+import { usePathname, useRouter } from 'expo-router'; // Import useRouter instead of router
 import { 
   View, 
   Text, 
@@ -8,7 +8,8 @@ import {
   TouchableOpacity, 
   StyleSheet, 
   Modal,
-  Alert 
+  Alert, 
+  BackHandler
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -20,10 +21,12 @@ export default function SignIn() {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
+  const router = useRouter(); // Use useRouter to get the router object
+  const currentPath = usePathname(); // Get the current pathname here
+
+
   const handleSignIn = async () => {
     if (!phoneNumber || !password) {
-      // Alert.alert('Error', 'Please enter your phone number and password.');
-      // return;
       setErrorMessage('Please enter your phone number and password.');
       setErrorModalVisible(true);
       return;
@@ -51,61 +54,69 @@ export default function SignIn() {
         await SecureStore.setItemAsync('accessToken', data.access);
         await SecureStore.setItemAsync('refreshToken', data.refresh);
   
-        // Alert.alert('Success', 'You are now signed in.');
         router.push('/auth/success'); // Navigate to the next screen
       } else {
-        // Alert.alert('Error', data.detail || 'Invalid credentials.');
         setErrorMessage('Oops! Seems like the phone number or password entered is wrong.');
         setErrorModalVisible(true);
       }
     } catch (error) {
         setErrorMessage('Something went wrong. could be your network.');
         setErrorModalVisible(true);
-        // Alert.alert('Error', 'Something went wrong. Please try again later.');
     } finally {
       setLoading(false);
     }
   };
 
-  const router = useRouter();
+  // Handle back button press
+  useEffect(() => {
 
-    
+    // Only handle the back button on the SignIn screen
+    if (currentPath === '/auth/login') {
+      const backAction = () => {
+        // Redirect to splash screen when back button is pressed
+        router.replace('/splash-1'); // Replace current screen with splash screen
+        return true; // Prevent default back behavior
+      };
+  
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+  
+      // Cleanup the event listener
+      return () => backHandler.remove();
+    }
+  }, [currentPath, router]);
+
   return (
     <View style={styles.container}>
       {/* Heading */}
-      {/* <Text style={styles.heading}>Sign In</Text> */}
-
       <Text style={styles.fieldTitle}>Phone Number *</Text>
-      {/* Phone Number Input */}
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. 09066867674"
-              placeholderTextColor='#a1a1a1'
-              keyboardType="phone-pad"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              />
+      <TextInput
+        style={styles.input}
+        placeholder="e.g. 09066867674"
+        placeholderTextColor='#a1a1a1'
+        keyboardType="phone-pad"
+        value={phoneNumber}
+        onChangeText={setPhoneNumber}
+      />
       <Text style={styles.fieldTitle}>Password</Text>
-      {/* Phone Number Input */}
       <View style={styles.passwordContainer}>
-            <TextInput
-               style={styles.passwordInput} 
-               placeholder="8 characters minimum" 
-               placeholderTextColor='#a1a1a1'
-               secureTextEntry={!passwordVisible} // Hide the password
-               value={password}
-               onChangeText={setPassword}
-               />
-              <TouchableOpacity
-                  onPress={() => setPasswordVisible(!passwordVisible)}
-                  style={styles.eyeIcon}
-                >
-                  <Ionicons
-                    name={passwordVisible ? 'eye' : 'eye-off'}
-                    size={24}
-                    color="#a1a1a1"
-                  />
-              </TouchableOpacity>
+        <TextInput
+          style={styles.passwordInput} 
+          placeholder="8 characters minimum" 
+          placeholderTextColor='#a1a1a1'
+          secureTextEntry={!passwordVisible} // Hide the password
+          value={password}
+          onChangeText={setPassword}
+        />
+        <TouchableOpacity
+          onPress={() => setPasswordVisible(!passwordVisible)}
+          style={styles.eyeIcon}
+        >
+          <Ionicons
+            name={passwordVisible ? 'eye' : 'eye-off'}
+            size={24}
+            color="#a1a1a1"
+          />
+        </TouchableOpacity>
       </View>
       <TouchableOpacity onPress={() => router.push('/auth/forgotPassword')} >
         <Text style={styles.forgotPasswordInText}>
@@ -115,54 +126,55 @@ export default function SignIn() {
 
       {/* Sign In Button */}
       <View style={styles.footer}>
-
-      <TouchableOpacity 
-        style={styles.signInButton} 
-        onPress={handleSignIn}
-        disabled={loading}
+        <TouchableOpacity 
+          style={styles.signInButton} 
+          onPress={handleSignIn}
+          disabled={loading}
         >
-        <Text style={styles.signInButtonText}>
-          {loading ? 'Signing In...' : 'Sign In'}
-        </Text>
-      </TouchableOpacity>
-
-      {/* Sign Up Redirect */}
-        <View style={styles.redirectMessage}>
-        <Text style={styles.redirectText}>New Here?</Text>
-        <TouchableOpacity onPress={() => router.push('/auth/register')} >
-          <Text style={styles.signUpText}>
-            Sign Up
+          <Text style={styles.signInButtonText}>
+            {loading ? 'Signing In...' : 'Sign In'}
           </Text>
         </TouchableOpacity>
+
+        {/* Sign Up Redirect */}
+        <View style={styles.redirectMessage}>
+          <Text style={styles.redirectText}>New Here?</Text>
+          <TouchableOpacity onPress={() => router.push('/auth/register')} >
+            <Text style={styles.signUpText}>
+              Sign Up
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
-         {/* Error Modal */}
-         <Modal
-          visible={errorModalVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setErrorModalVisible(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              {/* Red bar on the left */}
-              <View style={styles.modalRedBar} />
-              {/* Message and close icon */}
-              <View style={styles.modalMessageContainer}>
-                <Text style={styles.modalMessage}>{errorMessage}</Text>
-                <TouchableOpacity
-                  onPress={() => setErrorModalVisible(false)}
-                  style={styles.modalCloseIcon}
-                >
-                  <Ionicons name="close" size={24} color="#000" />
-                </TouchableOpacity>
-              </View>
+
+      {/* Error Modal */}
+      <Modal
+        visible={errorModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setErrorModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {/* Red bar on the left */}
+            <View style={styles.modalRedBar} />
+            {/* Message and close icon */}
+            <View style={styles.modalMessageContainer}>
+              <Text style={styles.modalMessage}>{errorMessage}</Text>
+              <TouchableOpacity
+                onPress={() => setErrorModalVisible(false)}
+                style={styles.modalCloseIcon}
+              >
+                <Ionicons name="close" size={24} color="#000" />
+              </TouchableOpacity>
             </View>
           </View>
-        </Modal>
+        </View>
+      </Modal>
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

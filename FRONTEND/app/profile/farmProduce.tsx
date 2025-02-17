@@ -17,6 +17,7 @@ import { Picker } from '@react-native-picker/picker';
 import { AntDesign } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import DropdownMenu, { MenuOption } from '../../components/DropdownMenu'; // Adjust the import path based on your project structure
+import * as SecureStore from 'expo-secure-store';
 
 
 export default function PostProduce() {
@@ -60,15 +61,15 @@ export default function PostProduce() {
   ];
 
   const options = [
-    { value: 'Fruits and Vegetables', label: 'Fruits and Vegetables' },
-    { value: 'Meat and Seafood', label: 'Meat and Seafood' },
-    { value: 'Dairy and Eggs', label: 'Dairy and Eggs' },
-    { value: 'Root and Tubers', label: 'Root and Tubers' },
+    { value: 'vegetables', label: 'Fruits and Vegetables' },
+    { value: 'meat_and_seafood', label: 'Meat and Seafood' },
+    { value: 'dairy_and_eggs', label: 'Dairy and Eggs' },
+    { value: 'root_and_tubers', label: 'Root and Tubers' },
   ];
 
   const statusoptions = [
-    { value: 'Available', label: 'Available' },
-    { value: 'Out of stock', label: 'Out of stock' },
+    { value: 'available', label: 'Available' },
+    { value: 'out of stock', label: 'Out of stock' },
   ];
 
   const pickImages = async () => {
@@ -107,58 +108,87 @@ export default function PostProduce() {
       pickupLocation,
     });
   };
+//-----------------------------------------------------------------------------
+const handlePublishProduce = async () => {
+  if (!produceName || !dropdown1Selection.length || !dropdown2Selection.length || !price || !pickupLocation) {
+    Alert.alert('Error', 'Please fill out all required fields.');
+    return;
+  }
 
-  const handlePublishProduce = async () => {
-    if (!produceName || !produceCategory.length || !produceStatus || !price || !pickupLocation) {
-      Alert.alert('Error', 'Please fill out all required fields.');
+  try {
+    const token = await SecureStore.getItemAsync('accessToken');
+    if (!token) {
+      Alert.alert('Error', 'Please login again');
+      router.push('/login');
       return;
     }
-  
-    try {
-      const formData = new FormData();
-      formData.append('name', produceName);
-      formData.append('description', description || '');
-      formData.append('produce_status', produceStatus);
-      formData.append('price', price);
-      formData.append('pickup_location', pickupLocation);
-  
-      // Add categories
-      produceCategory.forEach((category) =>
-        formData.append('produce_categories', category)
-      );
-  
-      // Convert images to Blob and append to FormData
-      for (const imageUri of images) {
-        const response = await fetch(imageUri);
-        const blob = await response.blob();
-        const fileName = imageUri.split('/').pop() || `image_${Date.now()}.jpg`;
-  
-        formData.append('images', blob, fileName);
-      }
-  
-      // Make API call
-      const response = await fetch('https://farm-meet.onrender.com/farmer/produce/', {
-        method: 'POST',
-        headers: {
-          'X-CSRFToken': 'h3eOpzuD463toQaw4JV0JsvkRVEKXmhtBodbeHOa7jcovg1bsucFMyRzIfXaD9rQ',
-        },
-        body: formData,
+
+    const formData = new FormData();
+    formData.append('name', produceName);
+    formData.append('description', description);
+    formData.append('price', price);
+    formData.append('pickup_location', pickupLocation);
+    formData.append('produce_status', dropdown2Selection[0]); // ✅ Fix applied here
+
+    // Append categories properly as an array
+    dropdown1Selection.forEach((category: string) => {
+      formData.append('produce_categories', category);
+    });
+
+    // Append images
+    if (images.length > 0) {
+      images.forEach((uri: string) => {
+        const filename = uri.split('/').pop() || 'image.jpg';
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : 'image/jpeg';
+
+        formData.append('images', {
+          uri,
+          name: filename,
+          type,
+        } as any);
       });
-  
-      const result = await response.json();
-  
-      if (response.ok) {
-        Alert.alert('Success', 'Produce published successfully!');
-        console.log('Published Data:', result);
-      } else {
-        Alert.alert('Error', 'Failed to publish produce. Please try again.');
-        console.error('Error:', result);
-      }
-    } catch (error) {
-      console.error('API Error:', error);
-      Alert.alert('Error', 'An error occurred while publishing produce.');
     }
-  };
+
+    // Debugging: Log FormData as JSON
+    const formDataJSON: Record<string, any> = {};
+    (formData as any)._parts.forEach(([key, value]: any) => {
+      formDataJSON[key] = value;
+    });
+
+    console.log('FormData as JSON:', JSON.stringify(formDataJSON, null, 2));
+
+    // API Request
+    const response = await fetch('https://farm-meet-snj4.onrender.com/farmer/produce/', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`, // No need for Content-Type
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        Alert.alert('Error', 'Session expired. Please login again.');
+        router.push('/login');
+        return;
+      }
+
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to publish produce');
+    }
+
+    const result = await response.json();
+    Alert.alert('Success', 'Produce published successfully!');
+    router.push('/profile');
+
+  } catch (error: any) {
+    console.error('API Error:', error);
+    Alert.alert('Error', error.message || 'Failed to publish produce. Please try again.');
+  }
+};
+
+//---------------------------------------------------------------------------------
   
   const handleSaveChanges = async ( )=> {
 

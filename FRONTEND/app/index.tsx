@@ -1,74 +1,66 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity,BackHandler, Image } from 'react-native';
-import { useRouter } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen'
-import { useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, BackHandler, Image, Dimensions } from 'react-native';
+import { usePathname, useRouter } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
-import { useFocusEffect } from 'expo-router';
 
 SplashScreen.preventAutoHideAsync();
 
 const GreenScreen: React.FC = () => {
   const router = useRouter();
+  const currentPath = usePathname(); // Get the current pathname here
 
-    const [loaded, error] = useFonts({
-      "SchibstedGrotesk-Medium": require("../assets/fonts/SchibstedGrotesk-Medium.otf"), 
-      "SchibstedGrotesk-Regular": require("../assets/fonts/SchibstedGrotesk-Regular.otf"),
-      "SchibstedGrotesk-MediumItalic": require("../assets/fonts/SchibstedGrotesk-MediumItalic.otf"), 
-      "SchibstedGrotesk-BoldItalic": require("../assets/fonts/SchibstedGrotesk-BoldItalic.otf"),   
-      "SchibstedGrotesk-SemiBold": require("../assets/fonts/SchibstedGrotesk-SemiBold.otf"), 
-      "SchibstedGrotesk-ExtraBold": require("../assets/fonts/SchibstedGrotesk-ExtraBold.otf"),   
-      "SchibstedGroteskBold": require("../assets/fonts/SchibstedGroteskBold.otf"),   
-      "Montserrat": require("../assets/fonts/Montserrat-Bold.ttf"),  
-      "Schibsted_Variable": require("../assets/fonts/SchibstedGrotesk-VariableFont_wght.ttf"),
-      "SchibstedItalic_Variable": require("../assets/fonts/SchibstedGrotesk-Italic-VariableFont_wght.ttf"),
-    });
+  const [loaded, error] = useFonts({
+    "SchibstedGrotesk-Medium": require("../assets/fonts/SchibstedGrotesk-Medium.otf"), 
+    "SchibstedGrotesk-Regular": require("../assets/fonts/SchibstedGrotesk-Regular.otf"),
+    "SchibstedGrotesk-MediumItalic": require("../assets/fonts/SchibstedGrotesk-MediumItalic.otf"), 
+    "SchibstedGrotesk-BoldItalic": require("../assets/fonts/SchibstedGrotesk-BoldItalic.otf"),   
+    "SchibstedGrotesk-SemiBold": require("../assets/fonts/SchibstedGrotesk-SemiBold.otf"), 
+    "SchibstedGrotesk-ExtraBold": require("../assets/fonts/SchibstedGrotesk-ExtraBold.otf"),   
+    "SchibstedGroteskBold": require("../assets/fonts/SchibstedGroteskBold.otf"),   
+    "Montserrat": require("../assets/fonts/Montserrat-Bold.ttf"),  
+    "Schibsted_Variable": require("../assets/fonts/SchibstedGrotesk-VariableFont_wght.ttf"),
+    "SchibstedItalic_Variable": require("../assets/fonts/SchibstedGrotesk-Italic-VariableFont_wght.ttf"),
+  });
 
-      // Prevent back navigation to this screen
-  useFocusEffect(
-    useCallback(() => {
-      const onBackPress = () => {
-        router.replace('/splash-1'); // Redirect to the initial splash screen
-        return true; // Prevent default behavior
-      };
-
-      BackHandler.addEventListener('hardwareBackPress', onBackPress);
-      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
-    }, [router])
-  );
-
-    useEffect(() => {
-      // Hide the splash screen once `loaded` or `error` is true
-      if (loaded || error) {
-        SplashScreen.hideAsync();
-      }
-  
-      // Navigate to the next screen after 3 seconds or on tap
-      const timeout = setTimeout(() => {
-        router.push('/splash-1');
-      }, 6000); // Adjusted to 3 seconds
-  
-      // Cleanup the timeout when the component unmounts
-      return () => clearTimeout(timeout);
-    }, [loaded, error, router]);
-  
-    // Handle tapping the screen to navigate immediately
-    const handleTap = () => {
-      router.push('/splash-1');
-    };
-  
-    // Early return if `loaded` is not true and there’s no error
-    if (!loaded && !error) {
-      return null;
+  useEffect(() => {
+    if (loaded || error) {
+      SplashScreen.hideAsync();
     }
+    const timeout = setTimeout(() => {
+      router.push('/splash-1');
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, [loaded, error, router]);
+
+  useEffect(() => {
+    const backAction = () => {
+      if (currentPath === '/') { 
+        BackHandler.exitApp();
+        return true;
+      }
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, [currentPath]);
+
+  const handleTap = () => {
+    router.replace('/splash-1');
+  };
+
+  if (!loaded && !error) {
+    return null;
+  }
+
+  const { width, height } = Dimensions.get('window');
 
   return (
     <View style={styles.container}>
       <View style={styles.logoHolder}>
-        <Image
-        source={require('../assets/icon.png')}
-        style={styles.logoImage}
-      />
+        <Image source={require('../assets/icon.png')} style={styles.logoImage} />
       </View>
       <TouchableOpacity onPress={handleTap}>
         <Text style={styles.whiteText}>FarmMeet</Text>
@@ -77,6 +69,8 @@ const GreenScreen: React.FC = () => {
     </View>
   );
 };
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -102,10 +96,11 @@ const styles = StyleSheet.create({
 
   //logo -------------
   logoImage: {
-    height: 70,
-    width: 73,
-    marginBottom: 5
-  }
+    width: 70, // 20% of screen width
+    height: 73, // 10% of screen height
+    resizeMode: 'contain',
+    marginBottom: 5,
+  },
 });
 
 export default GreenScreen;

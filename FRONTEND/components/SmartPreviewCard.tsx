@@ -20,34 +20,68 @@ type SmartPreviewCardActionButton = {
  * The smart preview card is mainly used to add sliding action menu. Basically you swipe left on the
  * preview card to reveal an action menu like edit, delete...
  */
-type Props = {
-  cardData?: {
-    id: string;
-    name: string;
-    price: string;
-    available: string;
-    image: any;
+// type Props = {
+//   cardData?: {
+//     id: number;
+//     name: string;
+//     price: string;
+//     produce_status: string;
+//     image: any;
+//   };
+//   children: React.ReactNode;
+
+//   /**
+//    * If passed, this will be triggered when the user starts to open the action menu.
+//    */
+//   onOpen?: () => void;
+
+//   /**
+//    * If passed, this will be triggered when the user closes the action menu.
+//    */
+//   onClose?: () => void;
+
+//   /**
+//    * The action buttons to display.
+//    */
+//   actionButtons: SmartPreviewCardActionButton[]
+//   /**
+//    * If true, and the user has not entered the actions menu in the past, then the component will
+//    * bounce a little to indicate that there is a swiping action available.
+//    */
+//   enableOnboarding?: boolean | undefined;
+// };
+
+type ProduceItem = {
+  id: number;
+  name: string;
+  description: string;
+  produce_categories: string;
+  produce_status: string;
+  price: string;
+  pickup_location: string;
+  images: Array<{ url: string; description: string }>;
+  farmer_profile: {
+    id: number;
+    full_name: string;
+    farm_name: string;
+    farm_address: string;
+    farmer_image: string | null;
+    phone_number: string;
+    email: string | null;
+    farm_size: string;
+    farm_category: string[];
+    delivery_days: string[];
+    max_orders: number;
+    description: string | null;
   };
+};
+
+type Props = {
+  cardData?: ProduceItem; // Use the ProduceItem type here
   children: React.ReactNode;
-
-  /**
-   * If passed, this will be triggered when the user starts to open the action menu.
-   */
   onOpen?: () => void;
-
-  /**
-   * If passed, this will be triggered when the user closes the action menu.
-   */
   onClose?: () => void;
-
-  /**
-   * The action buttons to display.
-   */
-  actionButtons: SmartPreviewCardActionButton[]
-  /**
-   * If true, and the user has not entered the actions menu in the past, then the component will
-   * bounce a little to indicate that there is a swiping action available.
-   */
+  actionButtons: SmartPreviewCardActionButton[];
   enableOnboarding?: boolean | undefined;
 };
 
