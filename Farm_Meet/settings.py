@@ -54,8 +54,6 @@ FLW_PUBLIC_KEY = env('FLW_PUBLIC_KEY')
 FLW_ENCRYPTION_KEY = env('FLW_ENCRYPTION_KEY')
 FLW_BASE_URL = env('FLW_BASE_URL', default='https://api.flutterwave.com/v3')
 
-# Debug print (remove in production)
-print("DATABASE_PASSWORD:", env('DATABASE_PASSWORD'))
 
 # DATABASE_PASSWORD
 DATABASE_PASSWORD = env('DATABASE_PASSWORD')
