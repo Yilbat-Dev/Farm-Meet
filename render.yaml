@@ -1,0 +1,27 @@
+databases:
+  - name: farm_meet_db
+    plan: free
+    databaseName: farm_meet  # Replaced hyphen with underscore
+    user: farm_meet          # Lowercase user name to match PostgreSQL rules
+
+services:
+  - type: web
+    plan: free
+    name: Farm_Meet
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn Farm_Meet.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: farm_meet_db  # Updated to match the database name
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
